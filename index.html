@@ -555,7 +555,7 @@ if(lastId){schedaId=lastId;load(lastId);}
 
 // ── YOUSIGN INTEGRATION ─────────────────────────────────────────────────────
 var YOUSIGN_API_KEY = ''; // chiave gestita dal proxy Cloudflare
-var YOUSIGN_BASE = 'https://yousign-proxy.caccettas.workers.dev';
+var YOUSIGN_BASE = 'https://yousign-proxy.caccettas.workers.dev/proxy';
 
 function inviaFirma(){
   if(!currentConsenso){showToast('Seleziona prima un consenso\nnella tab Consenso');return;}
