@@ -316,6 +316,10 @@ input,textarea,button,select{font-family:var(--fnt);font-weight:700;}
         </div>
         <button class="firma-clear" onclick="clearSingleFirma('e-firma-chirurgo')">Cancella firma</button>
       </div>
+      <div class="list" style="padding:14px 16px;">
+        <div id="e-consensi-salvati" style="font-size:13px;color:var(--txt3);margin-bottom:10px;"></div>
+        <button class="fbtn fbtn-sec" onclick="aggiungiAltroConsenso()" style="width:100%;font-size:14px;">+ Aggiungi un altro consenso</button>
+      </div>
     </div>
     <div style="height:8px;"></div>
   </div>
@@ -427,6 +431,9 @@ input,textarea,button,select{font-family:var(--fnt);font-weight:700;}
         <div class="trow"><span class="trow-lbl">Striae</span><div class="yn"><button class="yn-btn" data-key="eo5" data-val="si">Sì</button><button class="yn-btn" data-key="eo5" data-val="no">No</button></div></div>
         <div class="trow"><span class="trow-lbl">Cicatrici pregresse</span><div class="yn"><button class="yn-btn" data-key="eo6" data-val="si">Sì</button><button class="yn-btn" data-key="eo6" data-val="no">No</button></div></div>
         <div class="trow"><span class="trow-lbl">Asimmetria areola/capezzolo</span><div class="yn"><button class="yn-btn" data-key="eo7" data-val="si">Sì</button><button class="yn-btn" data-key="eo7" data-val="no">No</button></div></div>
+        <div class="trow"><span class="trow-lbl">Asimmetria del cingolo scapolare</span><div class="yn"><button class="yn-btn" data-key="eo8" data-val="si">Sì</button><button class="yn-btn" data-key="eo8" data-val="no">No</button></div></div>
+        <div class="row-area-lbl">Specificare (torace e morfologia)</div>
+        <div class="row-area"><textarea id="eo-torace-note" placeholder="Dettagli su deformità toraciche, asimmetrie, morfologia..." style="min-height:90px;"></textarea></div>
       </div>
       <div class="group-label group-label-blue">Ptosi</div>
       <div class="list list-blue">
@@ -453,10 +460,8 @@ input,textarea,button,select{font-family:var(--fnt);font-weight:700;}
         <div class="row"><span class="row-lbl">Base Width SX</span><input id="bap-bw-sx" type="number" step="0.1" placeholder="cm" oninput="calcBAP()"></div>
         <div class="row"><span class="row-lbl">N-IMF stretch DX</span><input id="bap-nimf-dx" type="number" step="0.1" placeholder="cm" oninput="calcBAP()"></div>
         <div class="row"><span class="row-lbl">N-IMF stretch SX</span><input id="bap-nimf-sx" type="number" step="0.1" placeholder="cm" oninput="calcBAP()"></div>
-        <div class="row"><span class="row-lbl">Pinch mediale DX</span><input id="bap-pm-dx" type="number" step="0.1" placeholder="cm" oninput="calcBAP()"></div>
-        <div class="row"><span class="row-lbl">Pinch mediale SX</span><input id="bap-pm-sx" type="number" step="0.1" placeholder="cm" oninput="calcBAP()"></div>
-        <div class="row"><span class="row-lbl">Pinch laterale DX</span><input id="bap-pl-dx" type="number" step="0.1" placeholder="cm" oninput="calcBAP()"></div>
-        <div class="row"><span class="row-lbl">Pinch laterale SX</span><input id="bap-pl-sx" type="number" step="0.1" placeholder="cm" oninput="calcBAP()"></div>
+        <div class="row"><span class="row-lbl">Pinch test DX</span><input id="bap-pm-dx" type="number" step="0.1" placeholder="cm" oninput="calcBAP()"></div>
+        <div class="row"><span class="row-lbl">Pinch test SX</span><input id="bap-pm-sx" type="number" step="0.1" placeholder="cm" oninput="calcBAP()"></div>
         <div class="row"><span class="row-lbl">SSN-N DX</span><input id="bap-ssn-dx" type="number" step="0.1" placeholder="cm" oninput="calcBAP()"></div>
         <div class="row"><span class="row-lbl">SSN-N SX</span><input id="bap-ssn-sx" type="number" step="0.1" placeholder="cm" oninput="calcBAP()"></div>
       </div>
@@ -799,7 +804,7 @@ var currentTabChir=0;
 var currentTabChirA=0;
 
 var FIELDS_EST=['e-data-scheda','e-cognome','e-nome','e-dob','e-lob','e-sesso','e-tel','e-email','e-area','e-diagnosi','ea1n','ea2n','ea3n','ea4n','ea5n','ea6n','ea7n','ea8n','ea9n','ea10n','ea11n','ea12n','ea13n','eapn','efarmn','e-anam','e-tratt','e-prod','e-zona','e-dose','e-sedute','e-note','e-data-tratt','e-followup','e-data-visita','e-cons-procedura'];
-var FIELDS_CHIR=['c-data-scheda','c-cognome','c-nome','c-dob','c-prof','c-altezza','c-peso','c-bmi','c-tel','c-email','ca1n','ca2n','ca3n','ca4n','ca4bn','ca5n','ca6n','ca7n','ca8n','ca9n','ca10n','ca11n','bap-circ-imf','bap-bw-dx','bap-bw-sx','bap-nimf-dx','bap-nimf-sx','bap-pm-dx','bap-pm-sx','bap-pl-dx','bap-pl-sx','bap-ssn-dx','bap-ssn-sx','prot-note','eo-note','eo-ptosi-dx','eo-ptosi-sx','op-reggiseno','op-note','c-data-visita','c-cons-procedura'];
+var FIELDS_CHIR=['c-data-scheda','c-cognome','c-nome','c-dob','c-prof','c-altezza','c-peso','c-bmi','c-tel','c-email','ca1n','ca2n','ca3n','ca4n','ca4bn','ca5n','ca6n','ca7n','ca8n','ca9n','ca10n','ca11n','bap-circ-imf','bap-bw-dx','bap-bw-sx','bap-nimf-dx','bap-nimf-sx','bap-pm-dx','bap-pm-sx','bap-ssn-dx','bap-ssn-sx','prot-note','eo-torace-note','eo-note','eo-ptosi-dx','eo-ptosi-sx','op-reggiseno','op-note','c-data-visita','c-cons-procedura'];
 var FIELDS_ALTRO=['a-data-scheda','a-cognome','a-nome','a-dob','a-prof','a-altezza','a-peso','a-bmi','a-tel','a-email','aa1n','aa2n','aa3n','aa4n','aa5n','aa6n','aa7n','aa8n','aa9n','aa10n','a-esame','a-note','a-data-visita','a-cons-procedura'];
 
 document.querySelectorAll('.yn-btn').forEach(function(btn){
@@ -893,8 +898,10 @@ function clearYn(){document.querySelectorAll('.yn-btn').forEach(function(b){b.st
 function newSchedaEst(){
   if(!confirm('Nuova scheda? Quella corrente è già salvata.'))return;
   schedaIdEst='est_'+Date.now();ynState={};currentConsenso=null;
+  consensiFirmati=[];
   FIELDS_EST.forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});
   clearYn();clearFirma('e');
+  if(typeof aggiornaListaConsensi==='function')aggiornaListaConsensi();
   document.getElementById('e-consenso-contenuto').style.display='none';
   document.getElementById('e-consenso-sel').value='';
   document.getElementById('e-data-scheda').value=oggiISO();
@@ -990,15 +997,23 @@ var firmaHasContent={};
 
 function initFirma(canvasId){
   var canvas=document.getElementById(canvasId);
-  if(!canvas||firmaCtx[canvasId])return;
-  var ratio=window.devicePixelRatio||1;
+  if(!canvas)return;
+  // Se già inizializzato ma con dimensioni 0 (tab era nascosto), reinizializza
+  if(firmaCtx[canvasId] && canvas.width>0)return;
+
   var rect=canvas.getBoundingClientRect();
+  if(rect.width===0){
+    // Tab non ancora visibile — riprova tra poco
+    setTimeout(function(){initFirma(canvasId);},120);
+    return;
+  }
+  var ratio=window.devicePixelRatio||1;
   canvas.width=rect.width*ratio;
   canvas.height=rect.height*ratio;
   var ctx=canvas.getContext('2d');
   ctx.scale(ratio,ratio);
   ctx.strokeStyle='#1C1C1E';
-  ctx.lineWidth=2;
+  ctx.lineWidth=2.2;
   ctx.lineCap='round';
   ctx.lineJoin='round';
   firmaCtx[canvasId]=ctx;
@@ -1006,9 +1021,9 @@ function initFirma(canvasId){
 
   function pos(e){
     var r=canvas.getBoundingClientRect();
-    var cx=(e.touches?e.touches[0].clientX:e.clientX)-r.left;
-    var cy=(e.touches?e.touches[0].clientY:e.clientY)-r.top;
-    return {x:cx,y:cy};
+    var clientX = e.clientX!=null ? e.clientX : (e.touches&&e.touches[0]?e.touches[0].clientX:0);
+    var clientY = e.clientY!=null ? e.clientY : (e.touches&&e.touches[0]?e.touches[0].clientY:0);
+    return {x:clientX-r.left, y:clientY-r.top};
   }
   function start(e){
     e.preventDefault();
@@ -1031,12 +1046,22 @@ function initFirma(canvasId){
     firmaDrawing[canvasId]=false;
     salvaFirmaCanvas(canvasId);
   }
-  canvas.addEventListener('mousedown',start);
-  canvas.addEventListener('mousemove',move);
-  window.addEventListener('mouseup',end);
-  canvas.addEventListener('touchstart',start,{passive:false});
-  canvas.addEventListener('touchmove',move,{passive:false});
-  canvas.addEventListener('touchend',end);
+
+  // Pointer Events: funzionano per Apple Pencil, dito e mouse
+  if(window.PointerEvent){
+    canvas.addEventListener('pointerdown',function(e){canvas.setPointerCapture(e.pointerId);start(e);});
+    canvas.addEventListener('pointermove',move);
+    canvas.addEventListener('pointerup',end);
+    canvas.addEventListener('pointercancel',end);
+  } else {
+    // Fallback per browser più vecchi
+    canvas.addEventListener('mousedown',start);
+    canvas.addEventListener('mousemove',move);
+    window.addEventListener('mouseup',end);
+    canvas.addEventListener('touchstart',start,{passive:false});
+    canvas.addEventListener('touchmove',move,{passive:false});
+    canvas.addEventListener('touchend',end);
+  }
 }
 
 function clearSingleFirma(canvasId){
@@ -1092,6 +1117,63 @@ function clearFirma(prefix){
   }
 }
 
+// ── CONSENSI MULTIPLI (Medicina Estetica) ────────────────────────────────────
+var consensiFirmati=[];
+
+function snapshotConsensoCorrente(){
+  var key=document.getElementById('e-consenso-sel').value;
+  if(!key||!CONSENSI[key])return null;
+  var fp=document.getElementById('e-firma-paziente');
+  var fc=document.getElementById('e-firma-chirurgo');
+  var fpData=(fp&&firmaHasContent['e-firma-paziente'])?fp.toDataURL('image/png'):null;
+  var fcData=(fc&&firmaHasContent['e-firma-chirurgo'])?fc.toDataURL('image/png'):null;
+  // raccogli dichiarazioni (yn)
+  var dich={};
+  CONSENSI[key].punti.forEach(function(p){dich['ec_'+p.id]=ynState['ec_'+p.id]||'';});
+  return {
+    key:key,
+    procedura:document.getElementById('e-cons-procedura').value||'',
+    foto:ynState['econs-foto']||'',
+    dataVisita:document.getElementById('e-data-visita').value||'',
+    dich:dich,
+    firmaPaziente:fpData,
+    firmaChirurgo:fcData
+  };
+}
+
+function aggiungiAltroConsenso(){
+  var snap=snapshotConsensoCorrente();
+  if(!snap){alert('Seleziona e compila un consenso prima di aggiungerne un altro.');return;}
+  consensiFirmati.push(snap);
+  aggiornaListaConsensi();
+  // Reset per nuovo consenso
+  document.getElementById('e-consenso-sel').value='';
+  document.getElementById('e-consenso-contenuto').style.display='none';
+  document.getElementById('e-cons-procedura').value='';
+  document.getElementById('e-data-visita').value='';
+  // pulisci firme correnti
+  clearSingleFirma('e-firma-paziente');
+  clearSingleFirma('e-firma-chirurgo');
+  // reset toggle foto
+  document.querySelectorAll('.yn-btn[data-key="econs-foto"]').forEach(function(b){b.style.background='';b.style.borderColor='';b.style.color='';});
+  delete ynState['econs-foto'];
+}
+
+function aggiornaListaConsensi(){
+  var el=document.getElementById('e-consensi-salvati');
+  if(!el)return;
+  if(consensiFirmati.length===0){el.innerHTML='';return;}
+  var nomi=consensiFirmati.map(function(c,i){
+    return '<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:0.5px solid var(--sep);"><span>✓ '+(CONSENSI[c.key]?CONSENSI[c.key].titolo:c.key)+'</span><span onclick="rimuoviConsenso('+i+')" style="color:var(--red);cursor:pointer;font-size:12px;">Rimuovi</span></div>';
+  }).join('');
+  el.innerHTML='<div style="font-weight:600;color:var(--txt);margin-bottom:4px;">Consensi già firmati ('+consensiFirmati.length+'):</div>'+nomi;
+}
+
+function rimuoviConsenso(i){
+  consensiFirmati.splice(i,1);
+  aggiornaListaConsensi();
+}
+
 // ── BAP ───────────────────────────────────────────────────────────────────────
 function bapVolume(bw){
   if(!bw||isNaN(bw))return null;
@@ -1101,12 +1183,11 @@ function bapVolume(bw){
   if(bw<14)return{min:350,max:500};
   return{min:450,max:650};
 }
-function bapProfilo(pm,pl){
+function bapProfilo(pm){
   if(!pm||isNaN(pm))return null;
-  if(pm>=2&&(!pl||isNaN(pl)||pl>=2))return'Basso/Moderato — sottoghiandolare possibile';
-  if(pm>=2&&pl<2)return'Moderato — valutare dual plane';
-  if(pm<2&&(!pl||isNaN(pl)||pl>=2))return'Alto — dual plane consigliato';
-  return'Extra-alto — sottomuscolare/dual plane III';
+  if(pm>=2)return'Copertura adeguata — sottoghiandolare possibile';
+  if(pm>=1.5)return'Copertura moderata — valutare dual plane';
+  return'Copertura sottile — dual plane/sottomuscolare consigliato';
 }
 function bapSolco(nimf){
   if(!nimf||isNaN(nimf))return null;
@@ -1121,22 +1202,20 @@ function calcBAP(){
   var nimfSx=parseFloat(document.getElementById('bap-nimf-sx').value);
   var pmDx=parseFloat(document.getElementById('bap-pm-dx').value);
   var pmSx=parseFloat(document.getElementById('bap-pm-sx').value);
-  var plDx=parseFloat(document.getElementById('bap-pl-dx').value);
-  var plSx=parseFloat(document.getElementById('bap-pl-sx').value);
   var hasDx=!isNaN(bwDx)||!isNaN(nimfDx)||!isNaN(pmDx);
   var hasSx=!isNaN(bwSx)||!isNaN(nimfSx)||!isNaN(pmSx);
   if(!hasDx&&!hasSx){document.getElementById('bap-result').style.display='none';return;}
-  function renderSide(bw,nimf,pm,pl){
+  function renderSide(bw,nimf,pm){
     var lines=[];
     var vol=bapVolume(bw);if(vol)lines.push('Volume: '+vol.min+'–'+vol.max+' cc');
     if(bw)lines.push('BW: '+bw+' cm');
-    var prof=bapProfilo(pm,pl);if(prof)lines.push(prof);
+    var prof=bapProfilo(pm);if(prof)lines.push(prof);
     var solco=bapSolco(nimf);if(solco)lines.push('Solco: '+solco);
     if(nimf)lines.push('N-IMF: '+nimf+' cm');
     return lines.join('<br>')||'—';
   }
-  document.getElementById('bap-out-dx').innerHTML=renderSide(bwDx,nimfDx,pmDx,plDx);
-  document.getElementById('bap-out-sx').innerHTML=renderSide(bwSx,nimfSx,pmSx,plSx);
+  document.getElementById('bap-out-dx').innerHTML=renderSide(bwDx,nimfDx,pmDx);
+  document.getElementById('bap-out-sx').innerHTML=renderSide(bwSx,nimfSx,pmSx);
   var notes=[];
   if(!isNaN(bwDx)&&!isNaN(bwSx)&&Math.abs(bwDx-bwSx)>0.5)notes.push('⚠️ Asimmetria BW '+Math.abs(bwDx-bwSx).toFixed(1)+' cm — considerare volumi differenti');
   if(!isNaN(pmDx)&&pmDx<1.5)notes.push('⚠️ DX: pinch mediale sottile — rischio rippling');
@@ -1263,39 +1342,41 @@ function salvaPDFEst(){
     var albls=['Allergie','Malattie autoimmuni','Disturbi coagulazione','Herpes labiale','Acne attiva','Patologia cutanea cronica','Interventi pregressi','Reazioni avverse estetici','Gravidanza','Allattamento','Isotretinoina 6 mesi','Fotosensibilizzanti','Fumo','Altre patologie','Farmaci in uso'];
     var hasA=false;akeys.forEach(function(k){if(ynState[k])hasA=true;});
     if(hasA){y=addSection(doc,y,'Anamnesi',RED);akeys.forEach(function(k,i){if(ynState[k])y=addYN(doc,y,albls[i],ynState[k]);});y+=3;}
-    var cKey=document.getElementById('e-consenso-sel').value;
-    if(cKey&&CONSENSI[cKey]){
-      doc.addPage();y=makePDFBase(doc,'CONSENSO INFORMATO',RED);
-      var cons=CONSENSI[cKey];
+
+    // Raccogli tutti i consensi: quelli già firmati + quello corrente
+    var tuttiConsensi=consensiFirmati.slice();
+    var curSnap=snapshotConsensoCorrente();
+    if(curSnap)tuttiConsensi.push(curSnap);
+
+    tuttiConsensi.forEach(function(snap){
+      var cons=CONSENSI[snap.key];
+      if(!cons)return;
+      doc.addPage();var yy=makePDFBase(doc,'CONSENSO INFORMATO',RED);
       doc.setTextColor(RED[0],RED[1],RED[2]);doc.setFont('helvetica','bold');doc.setFontSize(13);
-      doc.text(cons.titolo,105,y,{align:'center'});y+=8;
+      doc.text(cons.titolo,105,yy,{align:'center'});yy+=8;
       doc.setTextColor(100,100,100);doc.setFontSize(9);doc.setFont('helvetica','normal');
-      doc.text(cons.sottotitolo,105,y,{align:'center'});y+=8;
-      var proc=get('e-cons-procedura');
-      if(proc&&proc.trim()){y=addSection(doc,y,'Intervento / Procedura proposta',RED);y=addText(doc,y,'',proc);y+=2;}
+      doc.text(cons.sottotitolo,105,yy,{align:'center'});yy+=8;
+      if(snap.procedura&&snap.procedura.trim()){yy=addSection(doc,yy,'Intervento / Procedura proposta',RED);yy=addText(doc,yy,'',snap.procedura);yy+=2;}
       doc.setTextColor(28,28,30);doc.setFontSize(8);
       var tl=doc.splitTextToSize(cons.testo,178),bh=tl.length*4+6;
-      doc.setFillColor(247,247,249);doc.roundedRect(14,y,182,bh,2,2,'F');doc.text(tl,18,y+5);y+=bh+8;
-      y=addSection(doc,y,'Dichiarazioni',RED);
-      cons.punti.forEach(function(p){y=addYN(doc,y,p.testo,ynState['ec_'+p.id]);});
-      var fp=document.getElementById('e-firma-paziente'),fc=document.getElementById('e-firma-chirurgo');
-      var fpData=fp?localStorage.getItem('firma_e-firma-paziente_'+schedaIdEst):null;
-      var fcData=fc?localStorage.getItem('firma_e-firma-chirurgo_'+schedaIdEst):null;
-      if(fpData||fcData){
-        if(y>240){doc.addPage();y=makePDFBase(doc,'CONSENSO INFORMATO — Firme',RED);}
-        y=addSection(doc,y,'Firme',RED);
-        if(fpData){
-          doc.setFontSize(9);doc.setTextColor(100,100,100);doc.text('Firma del paziente',18,y);y+=3;
-          try{doc.addImage(fpData,'PNG',18,y,80,28);}catch(e){}
-          y+=32;
+      doc.setFillColor(247,247,249);doc.roundedRect(14,yy,182,bh,2,2,'F');doc.text(tl,18,yy+5);yy+=bh+8;
+      yy=addSection(doc,yy,'Dichiarazioni',RED);
+      cons.punti.forEach(function(p){yy=addYN(doc,yy,p.testo,snap.dich['ec_'+p.id]);});
+      if(snap.firmaPaziente||snap.firmaChirurgo){
+        if(yy>240){doc.addPage();yy=makePDFBase(doc,'CONSENSO INFORMATO — Firme',RED);}
+        yy=addSection(doc,yy,'Firme',RED);
+        if(snap.firmaPaziente){
+          doc.setFontSize(9);doc.setTextColor(100,100,100);doc.text('Firma del paziente',18,yy);yy+=3;
+          try{doc.addImage(snap.firmaPaziente,'PNG',18,yy,80,28);}catch(e){}
+          yy+=32;
         }
-        if(fcData){
-          doc.setFontSize(9);doc.setTextColor(100,100,100);doc.text('Firma del chirurgo',18,y);y+=3;
-          try{doc.addImage(fcData,'PNG',18,y,80,28);}catch(e){}
-          y+=32;
+        if(snap.firmaChirurgo){
+          doc.setFontSize(9);doc.setTextColor(100,100,100);doc.text('Firma del chirurgo',18,yy);yy+=3;
+          try{doc.addImage(snap.firmaChirurgo,'PNG',18,yy,80,28);}catch(e){}
+          yy+=32;
         }
       }
-    }
+    });
     addFooter(doc);
     var cognome=(get('e-cognome')||'Paziente').replace(/\s+/g,'_');
     doc.save('Estetica_'+cognome+'_'+new Date().toISOString().split('T')[0]+'.pdf');
@@ -1320,16 +1401,16 @@ function salvaPDFChir(){
     if(get('bap-circ-imf'))y=addField(doc,y,'Circ. torace IMF',get('bap-circ-imf')+' cm');
     y=addField(doc,y,'BW DX / SX',get('bap-bw-dx')+' / '+get('bap-bw-sx')+' cm');
     y=addField(doc,y,'N-IMF DX / SX',get('bap-nimf-dx')+' / '+get('bap-nimf-sx')+' cm');
-    y=addField(doc,y,'Pinch med DX / SX',get('bap-pm-dx')+' / '+get('bap-pm-sx')+' cm');
-    y=addField(doc,y,'Pinch lat DX / SX',get('bap-pl-dx')+' / '+get('bap-pl-sx')+' cm');
+    y=addField(doc,y,'Pinch test DX / SX',get('bap-pm-dx')+' / '+get('bap-pm-sx')+' cm');
     y=addField(doc,y,'SSN-N DX / SX',get('bap-ssn-dx')+' / '+get('bap-ssn-sx')+' cm');y+=3;
     y=addSection(doc,y,'Scelta Protesi',BLU);
     y=addText(doc,y,'Note ordine protesi',get('prot-note'));y+=3;
     y=addSection(doc,y,'Esame Obiettivo',BLU);
     y=addField(doc,y,'Ptosi DX',get('eo-ptosi-dx'));y=addField(doc,y,'Ptosi SX',get('eo-ptosi-sx'));
-    var eokeys=['eo1','eo2','eo3','eo4','eo5','eo6','eo7'];
-    var eolbls=['Pectus excavatum','Pectus carenatum','Scoliosi','Mammella tuberosa','Striae','Cicatrici','Asimmetria areola/capezzolo'];
+    var eokeys=['eo1','eo2','eo3','eo4','eo5','eo6','eo7','eo8'];
+    var eolbls=['Pectus excavatum','Pectus carenatum','Scoliosi','Mammella tuberosa','Striae','Cicatrici','Asimmetria areola/capezzolo','Asimmetria cingolo scapolare'];
     eokeys.forEach(function(k,i){if(ynState[k]==='si')y=addYN(doc,y,eolbls[i],'si');});
+    if(get('eo-torace-note'))y=addText(doc,y,'Torace/morfologia',get('eo-torace-note'));
     y=addText(doc,y,'Note',get('eo-note'));y+=3;
     y=addSection(doc,y,'Programma Operatorio',BLU);
     y=addText(doc,y,'Note operative',get('op-note'));
