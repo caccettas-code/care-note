@@ -1947,7 +1947,7 @@ function renderSchede(schede, query){
     var tipi=[...new Set(p.schede.map(function(s){return s.tipo;}))];
     var badges=tipi.map(function(t){return t==='est'?'<span class="scheda-card-badge badge-est">Estetica</span>':'<span class="scheda-card-badge badge-chir">Chirurgia</span>';}).join(' ');
     var ultima=p.ultimaData?new Date(p.ultimaData).toLocaleDateString('it-IT'):'';
-    return '<div class="scheda-card" onclick=\"apriProfilo('+encodeURIComponent(nome)+')\" style="cursor:pointer;">'
+    return '<div class="scheda-card" onclick="apriProfilo(\'+encodeURIComponent(nome)+\'\')" style="cursor:pointer;">'
       +'<div class="scheda-card-header">'
       +'<div class="scheda-card-name">'+highlight(nome,query)+'</div>'
       +'<div>'+badges+'</div>'
