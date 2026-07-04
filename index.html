@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v10 -->
+<!-- v11 -->
 <html lang="it">
 <head>
 <meta charset="UTF-8">
@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Schede Cliniche">
 <meta name="theme-color" content="#BEC6C3">
-<link rel="manifest" href="manifest.json">
+<link rel="manifest" href="/scheda-estetica/manifest.json">
 <link rel="apple-touch-icon" href="icon-192.png">
 <title>Dr. Simone Caccetta</title>
 <style>
@@ -1947,7 +1947,7 @@ function renderSchede(schede, query){
     var tipi=[...new Set(p.schede.map(function(s){return s.tipo;}))];
     var badges=tipi.map(function(t){return t==='est'?'<span class="scheda-card-badge badge-est">Estetica</span>':'<span class="scheda-card-badge badge-chir">Chirurgia</span>';}).join(' ');
     var ultima=p.ultimaData?new Date(p.ultimaData).toLocaleDateString('it-IT'):'';
-    return '<div class="scheda-card" onclick="apriProfilo(''+encodeURIComponent(nome)+'')" style="cursor:pointer;">'
+    return '<div class="scheda-card" onclick=\"apriProfilo('+encodeURIComponent(nome)+')\" style="cursor:pointer;">'
       +'<div class="scheda-card-header">'
       +'<div class="scheda-card-name">'+highlight(nome,query)+'</div>'
       +'<div>'+badges+'</div>'
