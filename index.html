@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v3 -->
+<!-- v8 -->
 <html lang="it">
 <head>
 <meta charset="UTF-8">
@@ -150,6 +150,21 @@ input,textarea,button,select{font-family:var(--fnt);font-weight:700;}
 .scheda-card-info{font-size:13px;color:#3A3A3C;font-weight:400;line-height:1.5;}
 .scheda-card-meta{font-size:11px;color:#8E8E93;font-weight:400;margin-top:6px;}
 .scheda-card-highlight{background:rgba(255,220,0,.25);border-radius:3px;padding:0 2px;}
+
+.foto-section{padding:16px;}
+.foto-btn-row{display:flex;gap:10px;margin-bottom:20px;}
+.foto-btn{flex:1;height:56px;border-radius:14px;border:none;font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;font-weight:700;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;}
+.foto-btn-camera{background:rgba(142,158,154,.2);color:#1C1C1E;border:1px solid rgba(142,158,154,.3);}
+.foto-btn-gallery{background:rgba(142,158,154,.12);color:#1C1C1E;border:1px solid rgba(142,158,154,.25);}
+.foto-gallery{columns:2;gap:8px;}
+.foto-thumb-wrap{break-inside:avoid;margin-bottom:8px;}
+.foto-thumb-title{font-size:12px;font-weight:700;color:#1C1C1E;padding:6px 4px 4px;font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;}
+.foto-thumb-title-input{width:100%;border:none;outline:none;font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;font-weight:700;font-size:12px;color:#1C1C1E;background:transparent;padding:6px 4px 4px;display:block;}
+.foto-thumb-title-input::placeholder{color:#8E8E93;}
+.foto-thumb-img{width:100%;border-radius:8px;display:block;object-fit:cover;}
+.foto-thumb-delete{position:absolute;top:6px;right:6px;width:22px;height:22px;border-radius:50%;background:rgba(0,0,0,.55);border:none;color:#fff;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:700;}
+.foto-thumb-inner{position:relative;}
+
 #toast{display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,.82);color:#fff;padding:16px 24px;border-radius:14px;font-size:15px;z-index:999;text-align:center;line-height:1.6;max-width:280px;}
 </style>
 </head>
@@ -204,7 +219,8 @@ input,textarea,button,select{font-family:var(--fnt);font-weight:700;}
     <button class="tab-est active" onclick="switchTabEst(0)">Anagrafica</button>
     <button class="tab-est" onclick="switchTabEst(1)">Anamnesi</button>
     <button class="tab-est" onclick="switchTabEst(2)">Trattamento</button>
-    <button class="tab-est" onclick="switchTabEst(3)">Consenso</button>
+    <button class="tab-est" onclick="switchTabEst(3)">Fotografie</button>
+    <button class="tab-est" onclick="switchTabEst(4)">Consenso</button>
   </div></div>
 
   <!-- EST TAB 0 -->
@@ -302,7 +318,24 @@ input,textarea,button,select{font-family:var(--fnt);font-weight:700;}
     </div>
   </div>
 
-  <!-- EST TAB 3 -->
+
+  <div class="page" id="est-tab-foto">
+    <div class="foto-section">
+      <div class="foto-btn-row">
+        <button class="foto-btn foto-btn-camera" onclick="document.getElementById('input-camera-est').click()">
+          Scatta foto
+          <input id="input-camera-est" type="file" accept="image/*" capture="environment" multiple style="display:none;" onchange="aggiungiFoto(this,'est')">
+        </button>
+        <button class="foto-btn foto-btn-gallery" onclick="document.getElementById('input-gallery-est').click()">
+          Carica foto
+          <input id="input-gallery-est" type="file" accept="image/*" multiple style="display:none;" onchange="aggiungiFoto(this,'est')">
+        </button>
+      </div>
+      <div class="foto-gallery" id="foto-gallery-est"></div>
+    </div>
+  </div>
+
+  <!-- EST TAB 4 (Consenso) -->
   <div class="page" id="est-tab3">
     <div class="group-label">Seleziona trattamento</div>
     <div class="list">
@@ -419,7 +452,8 @@ input,textarea,button,select{font-family:var(--fnt);font-weight:700;}
       <button class="tab-chir" onclick="switchTabChir(2)">Esame</button>
       <button class="tab-chir" onclick="switchTabChir(3)">BAP</button>
       <button class="tab-chir" onclick="switchTabChir(4)">Piano Op.</button>
-      <button class="tab-chir" onclick="switchTabChir(5)">Consenso</button>
+      <button class="tab-chir" onclick="switchTabChir(5)">Fotografie</button>
+      <button class="tab-chir" onclick="switchTabChir(6)">Consenso</button>
     </div></div>
 
     <!-- CHIR TAB 0: ANAGRAFICA -->
@@ -565,7 +599,24 @@ input,textarea,button,select{font-family:var(--fnt);font-weight:700;}
       <div style="height:8px;"></div>
     </div>
 
-    <!-- CHIR TAB 5: CONSENSO -->
+
+  <div class="page" id="chir-tab-foto">
+    <div class="foto-section">
+      <div class="foto-btn-row">
+        <button class="foto-btn foto-btn-camera" onclick="document.getElementById('input-camera-chir').click()">
+          Scatta foto
+          <input id="input-camera-chir" type="file" accept="image/*" capture="environment" multiple style="display:none;" onchange="aggiungiFoto(this,'chir')">
+        </button>
+        <button class="foto-btn foto-btn-gallery" onclick="document.getElementById('input-gallery-chir').click()">
+          Carica foto
+          <input id="input-gallery-chir" type="file" accept="image/*" multiple style="display:none;" onchange="aggiungiFoto(this,'chir')">
+        </button>
+      </div>
+      <div class="foto-gallery" id="foto-gallery-chir"></div>
+    </div>
+  </div>
+
+        <!-- CHIR TAB 5: CONSENSO -->
     <div class="page" id="chir-tab5">
       <div class="group-label group-label-blue">Seleziona intervento</div>
       <div class="list list-blue">
@@ -1069,7 +1120,11 @@ function switchTabEst(i){
 function switchTabChir(i){
   currentTabChir=i;
   document.querySelectorAll('.tab-chir').forEach(function(t,j){t.classList.toggle('active',i===j);});
-  document.querySelectorAll('#chir-mammella .page').forEach(function(p,j){p.style.display=(i===j)?'block':'none';});
+  var pages=['chir-tab0','chir-tab1','chir-tab2','chir-tab3','chir-tab4','chir-tab-foto','chir-tab5'];
+  pages.forEach(function(id,j){
+    var el=document.getElementById(id);
+    if(el)el.style.display=(i===j)?'block':'none';
+  });
 }
 function switchTabChirA(i){
   currentTabChirA=i;
@@ -1098,7 +1153,7 @@ function newSchedaEst(){
   document.getElementById('e-consenso-contenuto').style.display='none';
   document.getElementById('e-consenso-sel').value='';
   document.getElementById('e-data-scheda').value=oggiISO();
-  var fg=document.getElementById('foto-grid-est');if(fg)fg.innerHTML='';
+  clearFotoGallery('est');
   goHome();
 }
 function newSchedaChir(){
@@ -1109,7 +1164,7 @@ function newSchedaChir(){
   document.getElementById('c-consenso-contenuto').style.display='none';
   document.getElementById('c-consenso-sel').value='';
   document.getElementById('c-data-scheda').value=oggiISO();
-  var fg=document.getElementById('foto-grid-chir');if(fg)fg.innerHTML='';
+  clearFotoGallery('chir');
   goHome();
 }
 function newSchedaAltro(){
@@ -2417,6 +2472,77 @@ async function caricaFotoScheda(sbId, sezione) {
       +'<div style="position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.5);color:#fff;font-size:9px;font-weight:700;padding:3px 5px;text-transform:uppercase;">'+f.tipo+'</div>';
     grid.appendChild(div);
   });
+}
+
+
+// ── FOTO GALLERY ──────────────────────────────────────────────────────────────
+var fotoData = {est: [], chir: [], profilo: []};
+
+async function aggiungiFoto(input, sezione) {
+  var files = input.files;
+  if(!files||!files.length) return;
+  var gallery = document.getElementById('foto-gallery-' + sezione);
+  if(!gallery) return;
+
+  for(var i=0;i<files.length;i++){
+    (function(file){
+      var reader = new FileReader();
+      reader.onload = function(e){
+        var fotoId = 'foto-' + Date.now() + '-' + Math.random().toString(36).substr(2,4);
+        var wrap = document.createElement('div');
+        wrap.className = 'foto-thumb-wrap';
+        wrap.id = fotoId;
+        wrap.innerHTML = 
+          '<input class="foto-thumb-title-input" type="text" placeholder="Aggiungi titolo..." maxlength="80">'
+          +'<div class="foto-thumb-inner">'
+          +'<img class="foto-thumb-img" src="'+e.target.result+'">'
+          +'<button class="foto-thumb-delete" onclick="eliminaFoto(\''+fotoId+'\',\''+sezione+'\')">✕</button>'
+          +'</div>';
+        gallery.appendChild(wrap);
+
+        // Upload to Supabase
+        var sbId = sezione==='est' ? sbIdEst : (sezione==='chir' ? sbIdChir : null);
+        if(sbId){
+          sbCaricaFoto(sbId, file, 'clinica').then(function(url){
+            if(url){ wrap.setAttribute('data-url', url); }
+          });
+        } else {
+          pendingFotos.push({file: file, tipo: 'clinica', sezione: sezione, wrapId: fotoId});
+        }
+
+        // Store base64 for PDF
+        fotoData[sezione] = fotoData[sezione]||[];
+        fotoData[sezione].push({id: fotoId, src: e.target.result});
+      };
+      reader.readAsDataURL(file);
+    })(files[i]);
+  }
+  input.value = '';
+}
+
+function eliminaFoto(fotoId, sezione){
+  var el = document.getElementById(fotoId);
+  if(el) el.remove();
+  fotoData[sezione] = (fotoData[sezione]||[]).filter(function(f){ return f.id !== fotoId; });
+}
+
+function getFotoTitoli(sezione){
+  var gallery = document.getElementById('foto-gallery-'+sezione);
+  if(!gallery) return [];
+  var wraps = gallery.querySelectorAll('.foto-thumb-wrap');
+  var result = [];
+  wraps.forEach(function(w){
+    var img = w.querySelector('img');
+    var title = w.querySelector('.foto-thumb-title-input');
+    if(img) result.push({src: img.src, titolo: title ? title.value : ''});
+  });
+  return result;
+}
+
+function clearFotoGallery(sezione){
+  var g = document.getElementById('foto-gallery-'+sezione);
+  if(g) g.innerHTML = '';
+  fotoData[sezione] = [];
 }
 
 if('serviceWorker' in navigator){
