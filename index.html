@@ -896,17 +896,23 @@ var currentInterventoChir='';
 function openSection(sec){
   currentSection=sec;
   document.getElementById('home-screen').style.display='none';
+  // Hide all sections first
+  ['app-est','app-chir','app-docs','app-storico'].forEach(function(id){
+    var el=document.getElementById(id);if(el)el.style.display='none';
+  });
   if(sec==='est'){
     document.getElementById('app-est').style.display='block';
-    document.getElementById('app-chir').style.display='none';
-    // Non caricare automaticamente l'ultima scheda — inizia sempre nuova
     var de=document.getElementById('e-data-scheda');if(de&&!de.value)de.value=oggiISO();
-  } else {
+  } else if(sec==='chir'){
     document.getElementById('app-chir').style.display='block';
-    document.getElementById('app-est').style.display='none';
     document.getElementById('chir-home').style.display='block';
     document.getElementById('chir-mammella').style.display='none';
-    document.getElementById('chir-altro').style.display='none';
+    if(document.getElementById('chir-altro'))document.getElementById('chir-altro').style.display='none';
+  } else if(sec==='docs'){
+    document.getElementById('app-docs').style.display='block';
+  } else if(sec==='storico'){
+    document.getElementById('app-storico').style.display='block';
+    aggiornaStorico();
   }
 }
 
@@ -928,6 +934,9 @@ function openIntervento(tipo){
 
 function goHome(){
   currentSection='';
+  ['app-est','app-chir','app-docs','app-storico'].forEach(function(id){
+    var el=document.getElementById(id);if(el)el.style.display='none';
+  });
   currentInterventoChir='';
   document.getElementById('home-screen').style.display='flex';
   document.getElementById('app-est').style.display='none';
