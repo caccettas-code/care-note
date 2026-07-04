@@ -1089,25 +1089,27 @@ function clearYn(){document.querySelectorAll('.yn-btn').forEach(function(b){b.st
 
 function newSchedaEst(){
   if(!confirm('Nuova scheda? Quella corrente è già salvata.'))return;
-  schedaIdEst='est_'+Date.now();ynState={};currentConsenso=null;
+  schedaIdEst='sc_est_'+Date.now();ynState={};currentConsenso=null;sbIdEst=null;
   consensiFirmati=[];
   FIELDS_EST.forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});
-  clearYn();clearFirma('e');
+  clearYn();if(typeof clearFirma==='function')clearFirma('e');
   if(typeof aggiornaListaConsensi==='function')aggiornaListaConsensi();
   document.getElementById('e-consenso-contenuto').style.display='none';
   document.getElementById('e-consenso-sel').value='';
   document.getElementById('e-data-scheda').value=oggiISO();
-  switchTabEst(0);
+  var fg=document.getElementById('foto-grid-est');if(fg)fg.innerHTML='';
+  goHome();
 }
 function newSchedaChir(){
   if(!confirm('Nuova scheda? Quella corrente è già salvata.'))return;
-  schedaIdChir='chir_'+Date.now();ynState={};currentConsenso=null;
+  schedaIdChir='sc_chir_'+Date.now();ynState={};currentConsenso=null;sbIdChir=null;
   FIELDS_CHIR.forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});
   clearYn();
   document.getElementById('c-consenso-contenuto').style.display='none';
   document.getElementById('c-consenso-sel').value='';
   document.getElementById('c-data-scheda').value=oggiISO();
-  switchTabChir(0);
+  var fg=document.getElementById('foto-grid-chir');if(fg)fg.innerHTML='';
+  goHome();
 }
 function newSchedaAltro(){
   if(!confirm('Nuova scheda? Quella corrente è già salvata.'))return;
@@ -1519,24 +1521,24 @@ function salvaPDFEst(){
   if(!jsPDFClass){showToast('Libreria PDF in caricamento, riprovare tra un secondo.');return;}
   try{
     var doc=new jsPDFClass({orientation:'portrait',unit:'mm',format:'a4'});
-    var RED=[192,57,43];
-    var y=makePDFBase(doc,'SCHEDA MEDICINA ESTETICA',RED);
-    y=addSection(doc,y,'Dati Anagrafici',RED);
+    var SAGE=[142,158,154];
+    var y=makePDFBase(doc,'SCHEDA MEDICINA ESTETICA',SAGE);
+    y=addSection(doc,y,'Dati Anagrafici',SAGE);
     if(get('e-data-scheda'))y=addField(doc,y,'Data scheda',get('e-data-scheda'));
     y=addField(doc,y,'Cognome',get('e-cognome'));y=addField(doc,y,'Nome',get('e-nome'));
     y=addField(doc,y,'Data di nascita',get('e-dob'));y=addField(doc,y,'Sesso',get('e-sesso'));
     y=addField(doc,y,'Telefono',get('e-tel'));y=addField(doc,y,'E-mail',get('e-email'));y+=3;
-    y=addSection(doc,y,'Motivo della Visita',RED);
+    y=addSection(doc,y,'Motivo della Visita',SAGE);
     y=addField(doc,y,'Area di interesse',get('e-area'));
     y=addText(doc,y,'Diagnosi / Inestetismo',get('e-diagnosi'));y+=2;
-    y=addSection(doc,y,'Piano di Trattamento',RED);
+    y=addSection(doc,y,'Piano di Trattamento',SAGE);
     y=addText(doc,y,'Trattamento concordato',get('e-tratt'));
     y=addField(doc,y,'Prodotto',get('e-prod'));y=addField(doc,y,'Zona',get('e-zona'));
     y=addField(doc,y,'Data trattamento',get('e-data-tratt'));y+=3;
     var akeys=['ea1','ea2','ea3','ea4','ea5','ea6','ea7','ea8','ea9','ea10','ea11','ea12','ea13','eap','efarm'];
     var albls=['Allergie','Malattie autoimmuni','Disturbi coagulazione','Herpes labiale','Acne attiva','Patologia cutanea cronica','Interventi pregressi','Reazioni avverse estetici','Gravidanza','Allattamento','Isotretinoina 6 mesi','Fotosensibilizzanti','Fumo','Altre patologie','Farmaci in uso'];
     var hasA=false;akeys.forEach(function(k){if(ynState[k])hasA=true;});
-    if(hasA){y=addSection(doc,y,'Anamnesi',RED);akeys.forEach(function(k,i){if(ynState[k])y=addYN(doc,y,albls[i],ynState[k]);});y+=3;}
+    if(hasA){y=addSection(doc,y,'Anamnesi',SAGE);akeys.forEach(function(k,i){if(ynState[k])y=addYN(doc,y,albls[i],ynState[k]);});y+=3;}
 
     // Raccogli tutti i consensi: quelli già firmati + quello corrente
     var tuttiConsensi=consensiFirmati.slice();
@@ -1546,20 +1548,20 @@ function salvaPDFEst(){
     tuttiConsensi.forEach(function(snap){
       var cons=CONSENSI[snap.key];
       if(!cons)return;
-      doc.addPage();var yy=makePDFBase(doc,'CONSENSO INFORMATO',RED);
+      doc.addPage();var yy=makePDFBase(doc,'CONSENSO INFORMATO',SAGE);
       doc.setTextColor(RED[0],RED[1],RED[2]);doc.setFont('helvetica','bold');doc.setFontSize(13);
       doc.text(cons.titolo,105,yy,{align:'center'});yy+=8;
       doc.setTextColor(100,100,100);doc.setFontSize(9);doc.setFont('helvetica','normal');
       doc.text(cons.sottotitolo,105,yy,{align:'center'});yy+=8;
-      if(snap.procedura&&snap.procedura.trim()){yy=addSection(doc,yy,'Intervento / Procedura proposta',RED);yy=addText(doc,yy,'',snap.procedura);yy+=2;}
+      if(snap.procedura&&snap.procedura.trim()){yy=addSection(doc,yy,'Intervento / Procedura proposta',SAGE);yy=addText(doc,yy,'',snap.procedura);yy+=2;}
       doc.setTextColor(28,28,30);doc.setFontSize(8);
       var tl=doc.splitTextToSize(cons.testo,178),bh=tl.length*4+6;
       doc.setFillColor(247,247,249);doc.roundedRect(14,yy,182,bh,2,2,'F');doc.text(tl,18,yy+5);yy+=bh+8;
-      yy=addSection(doc,yy,'Dichiarazioni',RED);
+      yy=addSection(doc,yy,'Dichiarazioni',SAGE);
       cons.punti.forEach(function(p){yy=addYN(doc,yy,p.testo,snap.dich['ec_'+p.id]);});
       if(snap.firmaPaziente||snap.firmaChirurgo){
-        if(yy>240){doc.addPage();yy=makePDFBase(doc,'CONSENSO INFORMATO — Firme',RED);}
-        yy=addSection(doc,yy,'Firme',RED);
+        if(yy>240){doc.addPage();yy=makePDFBase(doc,'CONSENSO INFORMATO — Firme',SAGE);}
+        yy=addSection(doc,yy,'Firme',SAGE);
         if(snap.firmaPaziente){
           doc.setFontSize(9);doc.setTextColor(100,100,100);doc.text('Firma del paziente',18,yy);yy+=3;
           try{doc.addImage(snap.firmaPaziente,'PNG',18,yy,80,28);}catch(e){}
@@ -1584,47 +1586,47 @@ function salvaPDFChir(){
   if(!jsPDFClass){showToast('Libreria PDF in caricamento, riprovare tra un secondo.');return;}
   try{
     var doc=new jsPDFClass({orientation:'portrait',unit:'mm',format:'a4'});
-    var BLU=[33,118,174];
-    var y=makePDFBase(doc,'SCHEDA CHIRURGICA — MAMMELLA',BLU);
-    y=addSection(doc,y,'Dati Anagrafici',BLU);
+    var SAGE=[142,158,154];
+    var y=makePDFBase(doc,'SCHEDA CHIRURGICA — MAMMELLA',SAGE);
+    y=addSection(doc,y,'Dati Anagrafici',SAGE);
     if(get('c-data-scheda'))y=addField(doc,y,'Data scheda',get('c-data-scheda'));
     y=addField(doc,y,'Cognome',get('c-cognome'));y=addField(doc,y,'Nome',get('c-nome'));
     y=addField(doc,y,'Data di nascita',get('c-dob'));
     y=addField(doc,y,'Altezza',get('c-altezza')+' cm');y=addField(doc,y,'Peso',get('c-peso')+' kg');y=addField(doc,y,'BMI',get('c-bmi'));
     y=addField(doc,y,'Telefono',get('c-tel'));y=addField(doc,y,'E-mail',get('c-email'));y+=3;
-    y=addSection(doc,y,'BAP — Misurazioni',BLU);
+    y=addSection(doc,y,'BAP — Misurazioni',SAGE);
     if(get('bap-circ-imf'))y=addField(doc,y,'Circ. torace IMF',get('bap-circ-imf')+' cm');
     y=addField(doc,y,'BW DX / SX',get('bap-bw-dx')+' / '+get('bap-bw-sx')+' cm');
     y=addField(doc,y,'N-IMF DX / SX',get('bap-nimf-dx')+' / '+get('bap-nimf-sx')+' cm');
     var pinchVal=ynState['bap-pinch']==='gt2'?'> 2 cm':ynState['bap-pinch']==='lt2'?'< 2 cm':'—';
     y=addField(doc,y,'Pinch test',pinchVal);
     y=addField(doc,y,'SSN-N DX / SX',get('bap-ssn-dx')+' / '+get('bap-ssn-sx')+' cm');y+=3;
-    y=addSection(doc,y,'Scelta Protesi',BLU);
+    y=addSection(doc,y,'Scelta Protesi',SAGE);
     y=addText(doc,y,'Note ordine protesi',get('prot-note'));y+=3;
-    y=addSection(doc,y,'Esame Obiettivo',BLU);
+    y=addSection(doc,y,'Esame Obiettivo',SAGE);
     y=addField(doc,y,'Ptosi DX',get('eo-ptosi-dx'));y=addField(doc,y,'Ptosi SX',get('eo-ptosi-sx'));
     var eokeys=['eo1','eo2','eo3','eo4','eo5','eo6','eo7','eo8'];
     var eolbls=['Pectus excavatum','Pectus carenatum','Scoliosi','Mammella tuberosa','Striae','Cicatrici','Asimmetria areola/capezzolo','Asimmetria cingolo scapolare'];
     eokeys.forEach(function(k,i){if(ynState[k]==='si')y=addYN(doc,y,eolbls[i],'si');});
     if(get('eo-torace-note'))y=addText(doc,y,'Torace/morfologia',get('eo-torace-note'));
     y=addText(doc,y,'Note',get('eo-note'));y+=3;
-    y=addSection(doc,y,'Programma Operatorio',BLU);
+    y=addSection(doc,y,'Programma Operatorio',SAGE);
     y=addText(doc,y,'Note operative',get('op-note'));
     if(get('op-reggiseno'))y=addField(doc,y,'Taglia reggiseno',get('op-reggiseno'));
     var cKey=document.getElementById('c-consenso-sel').value;
     if(cKey&&CONSENSI[cKey]){
-      doc.addPage();y=makePDFBase(doc,'CONSENSO INFORMATO',BLU);
+      doc.addPage();y=makePDFBase(doc,'CONSENSO INFORMATO',SAGE);
       var cons=CONSENSI[cKey];
       doc.setTextColor(BLU[0],BLU[1],BLU[2]);doc.setFont('helvetica','bold');doc.setFontSize(13);
       doc.text(cons.titolo,105,y,{align:'center'});y+=8;
       doc.setTextColor(100,100,100);doc.setFontSize(9);doc.setFont('helvetica','normal');
       doc.text(cons.sottotitolo,105,y,{align:'center'});y+=8;
       var proc=get('c-cons-procedura');
-      if(proc&&proc.trim()){y=addSection(doc,y,'Intervento / Procedura proposta',BLU);y=addText(doc,y,'',proc);y+=2;}
+      if(proc&&proc.trim()){y=addSection(doc,y,'Intervento / Procedura proposta',SAGE);y=addText(doc,y,'',proc);y+=2;}
       doc.setTextColor(28,28,30);doc.setFontSize(8);
       var tl=doc.splitTextToSize(cons.testo,178),bh=tl.length*4+6;
       doc.setFillColor(247,247,249);doc.roundedRect(14,y,182,bh,2,2,'F');doc.text(tl,18,y+5);y+=bh+8;
-      y=addSection(doc,y,'Dichiarazioni',BLU);
+      y=addSection(doc,y,'Dichiarazioni',SAGE);
       cons.punti.forEach(function(p){y=addYN(doc,y,p.testo,ynState['cc_'+p.id]);});
     }
     addFooter(doc);
@@ -1639,9 +1641,9 @@ function salvaPDFAltro(){
   if(!jsPDFClass){showToast('Libreria PDF in caricamento, riprovare tra un secondo.');return;}
   try{
     var doc=new jsPDFClass({orientation:'portrait',unit:'mm',format:'a4'});
-    var BLU=[33,118,174];
-    var y=makePDFBase(doc,'SCHEDA CHIRURGICA',BLU);
-    y=addSection(doc,y,'Dati Anagrafici',BLU);
+    var SAGE=[142,158,154];
+    var y=makePDFBase(doc,'SCHEDA CHIRURGICA',SAGE);
+    y=addSection(doc,y,'Dati Anagrafici',SAGE);
     if(get('a-data-scheda'))y=addField(doc,y,'Data scheda',get('a-data-scheda'));
     y=addField(doc,y,'Cognome',get('a-cognome'));y=addField(doc,y,'Nome',get('a-nome'));
     y=addField(doc,y,'Data di nascita',get('a-dob'));
@@ -1650,25 +1652,25 @@ function salvaPDFAltro(){
     var akeys=['aa1','aa2','aa3','aa4','aa5','aa6','aa7','aa8','aa9','aa10'];
     var albls=['Allergie','Patologie cardiovascolari','Diabete','Disturbi coagulazione','Trombosi/embolia pregressa','Patologie sistemiche','Pregressi interventi chirurgici','Farmaci in uso','Fumo','Gravidanza/pianificata'];
     var hasA=false;akeys.forEach(function(k){if(ynState[k])hasA=true;});
-    if(hasA){y=addSection(doc,y,'Anamnesi',BLU);akeys.forEach(function(k,i){if(ynState[k])y=addYN(doc,y,albls[i],ynState[k]);});y+=3;}
-    y=addSection(doc,y,'Esame Obiettivo',BLU);
+    if(hasA){y=addSection(doc,y,'Anamnesi',SAGE);akeys.forEach(function(k,i){if(ynState[k])y=addYN(doc,y,albls[i],ynState[k]);});y+=3;}
+    y=addSection(doc,y,'Esame Obiettivo',SAGE);
     y=addText(doc,y,'',get('a-esame'));y+=2;
-    y=addSection(doc,y,'Programma Operatorio',BLU);
+    y=addSection(doc,y,'Programma Operatorio',SAGE);
     y=addText(doc,y,'Note operative',get('a-note'));
     var cKey=document.getElementById('a-consenso-sel').value;
     if(cKey&&CONSENSI[cKey]){
-      doc.addPage();y=makePDFBase(doc,'CONSENSO INFORMATO',BLU);
+      doc.addPage();y=makePDFBase(doc,'CONSENSO INFORMATO',SAGE);
       var cons=CONSENSI[cKey];
       doc.setTextColor(BLU[0],BLU[1],BLU[2]);doc.setFont('helvetica','bold');doc.setFontSize(13);
       doc.text(cons.titolo,105,y,{align:'center'});y+=8;
       doc.setTextColor(100,100,100);doc.setFontSize(9);doc.setFont('helvetica','normal');
       doc.text(cons.sottotitolo,105,y,{align:'center'});y+=8;
       var proc=get('a-cons-procedura');
-      if(proc&&proc.trim()){y=addSection(doc,y,'Intervento / Procedura proposta',BLU);y=addText(doc,y,'',proc);y+=2;}
+      if(proc&&proc.trim()){y=addSection(doc,y,'Intervento / Procedura proposta',SAGE);y=addText(doc,y,'',proc);y+=2;}
       doc.setTextColor(28,28,30);doc.setFontSize(8);
       var tl=doc.splitTextToSize(cons.testo,178),bh=tl.length*4+6;
       doc.setFillColor(247,247,249);doc.roundedRect(14,y,182,bh,2,2,'F');doc.text(tl,18,y+5);y+=bh+8;
-      y=addSection(doc,y,'Dichiarazioni',BLU);
+      y=addSection(doc,y,'Dichiarazioni',SAGE);
       cons.punti.forEach(function(p){y=addYN(doc,y,p.testo,ynState['ac_'+p.id]);});
     }
     addFooter(doc);
@@ -1708,11 +1710,11 @@ function eseguiFirma(){
     var y=0;
     if(currentSection==='est'){
       var RED=[192,57,43];
-      y=makePDFBase(doc,'CONSENSO INFORMATO',RED);
-      y=addSection(doc,y,'Paziente',RED);
+      y=makePDFBase(doc,'CONSENSO INFORMATO',SAGE);
+      y=addSection(doc,y,'Paziente',SAGE);
       y=addField(doc,y,'Cognome',get('e-cognome'));y=addField(doc,y,'Nome',get('e-nome'));
       y=addField(doc,y,'Data di nascita',get('e-dob'));y+=3;
-      y=addSection(doc,y,'Trattamento',RED);
+      y=addSection(doc,y,'Trattamento',SAGE);
       y=addField(doc,y,'Area',get('e-area'));y=addText(doc,y,'Trattamento',get('e-tratt'));y+=3;
       if(currentConsenso&&CONSENSI[currentConsenso]){
         var cons=CONSENSI[currentConsenso];
@@ -1721,21 +1723,21 @@ function eseguiFirma(){
         doc.setTextColor(28,28,30);doc.setFont('helvetica','normal');doc.setFontSize(8);
         var tl=doc.splitTextToSize(cons.testo,178),bh=tl.length*4+6;
         doc.setFillColor(247,247,249);doc.roundedRect(14,y,182,bh,2,2,'F');doc.text(tl,18,y+5);y+=bh+8;
-        y=addSection(doc,y,'Dichiarazioni',RED);
+        y=addSection(doc,y,'Dichiarazioni',SAGE);
         cons.punti.forEach(function(p){y=addYN(doc,y,p.testo,ynState['ec_'+p.id]);});
       }
-      doc.addPage();y=makePDFBase(doc,'FIRMA PAZIENTE',RED);
+      doc.addPage();y=makePDFBase(doc,'FIRMA PAZIENTE',SAGE);
       y+=10;doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(100,100,100);
       doc.text('Paziente: '+nome,14,y);y+=6;
       doc.text('Data: '+new Date().toLocaleDateString('it-IT'),14,y);y+=16;
       doc.setFillColor(247,247,249);doc.roundedRect(14,y,182,30,2,2,'F');
       doc.setFontSize(9);doc.setTextColor(150,150,150);doc.text('[Firma elettronica certificata Yousign]',105,y+17,{align:'center'});
     } else {
-      var BLU=[33,118,174];
-      y=makePDFBase(doc,'SCHEDA CHIRURGICA — MAMMELLA',BLU);
-      y=addSection(doc,y,'Paziente',BLU);
+      var SAGE=[142,158,154];
+      y=makePDFBase(doc,'SCHEDA CHIRURGICA — MAMMELLA',SAGE);
+      y=addSection(doc,y,'Paziente',SAGE);
       y=addField(doc,y,'Cognome',get('c-cognome'));y=addField(doc,y,'Nome',get('c-nome'));y+=3;
-      y=addSection(doc,y,'Programma Operatorio',BLU);
+      y=addSection(doc,y,'Programma Operatorio',SAGE);
       y=addText(doc,y,'Note operative',get('op-note'));y+=10;
       doc.setFillColor(247,247,249);doc.roundedRect(14,y,182,30,2,2,'F');
       doc.setFontSize(9);doc.setTextColor(150,150,150);doc.text('[Firma elettronica certificata Yousign]',105,y+17,{align:'center'});
@@ -2231,61 +2233,73 @@ var sbIdChir = null;
 async function salvaEst() {
   showToast('Salvataggio in corso...');
   var dati = raccogliDatiEst();
-  var cognome = dati['e-cognome'] || '';
-  var nome = dati['e-nome'] || '';
+  var cognome = (dati['e-cognome'] || '').trim();
+  var nome = (dati['e-nome'] || '').trim();
+  
+  // Ensure schedaIdEst starts with sc_est_ for storico compatibility
+  if(!schedaIdEst || !schedaIdEst.startsWith('sc_est_')) {
+    schedaIdEst = 'sc_est_' + Date.now();
+  }
+  dati.id = schedaIdEst;
+  dati.ts = new Date().toISOString();
+  dati.tipo = 'est';
   
   // Save to localStorage
-  var lsKey = 'sc_est_' + (schedaIdEst || Date.now());
-  dati.id = lsKey;
-  dati.ts = new Date().toISOString();
-  localStorage.setItem(lsKey, JSON.stringify(dati));
-  localStorage.setItem('sc_last_est', lsKey);
+  localStorage.setItem(schedaIdEst, JSON.stringify(dati));
+  localStorage.setItem('sc_last_est', schedaIdEst);
   
   // Save to Supabase
-  var sbId;
   if(sbIdEst) {
     await sbAggiornalScheda(sbIdEst, 'est', cognome, nome, dati);
-    sbId = sbIdEst;
   } else {
-    sbId = await sbSalvaScheda('est', cognome, nome, dati);
-    sbIdEst = sbId;
+    sbIdEst = await sbSalvaScheda('est', cognome, nome, dati);
   }
+  
+  // Upload pending photos
+  if(sbIdEst) await uploadPendingFotos(sbIdEst, 'est');
   
   // Generate and download PDF
   salvaPDFEst();
   
   document.getElementById('dot-est').style.background='#30D158';
   document.getElementById('saved-est').textContent='Salvato alle '+new Date().getHours()+':'+String(new Date().getMinutes()).padStart(2,'0');
+  showToast('Scheda salvata!');
 }
 
 async function salvaChir() {
   showToast('Salvataggio in corso...');
   var dati = raccogliDatiChir();
-  var cognome = dati['c-cognome'] || '';
-  var nome = dati['c-nome'] || '';
+  var cognome = (dati['c-cognome'] || '').trim();
+  var nome = (dati['c-nome'] || '').trim();
+  
+  // Ensure schedaIdChir starts with sc_chir_ for storico compatibility
+  if(!schedaIdChir || !schedaIdChir.startsWith('sc_chir_')) {
+    schedaIdChir = 'sc_chir_' + Date.now();
+  }
+  dati.id = schedaIdChir;
+  dati.ts = new Date().toISOString();
+  dati.tipo = 'chir';
   
   // Save to localStorage
-  var lsKey = 'sc_chir_' + (schedaIdChir || Date.now());
-  dati.id = lsKey;
-  dati.ts = new Date().toISOString();
-  localStorage.setItem(lsKey, JSON.stringify(dati));
-  localStorage.setItem('sc_last_chir', lsKey);
+  localStorage.setItem(schedaIdChir, JSON.stringify(dati));
+  localStorage.setItem('sc_last_chir', schedaIdChir);
   
   // Save to Supabase
-  var sbId;
   if(sbIdChir) {
     await sbAggiornalScheda(sbIdChir, 'chir', cognome, nome, dati);
-    sbId = sbIdChir;
   } else {
-    sbId = await sbSalvaScheda('chir', cognome, nome, dati);
-    sbIdChir = sbId;
+    sbIdChir = await sbSalvaScheda('chir', cognome, nome, dati);
   }
+  
+  // Upload pending photos
+  if(sbIdChir) await uploadPendingFotos(sbIdChir, 'chir');
   
   // Generate and download PDF
   salvaPDFChir();
   
   document.getElementById('dot-chir').style.background='#30D158';
   document.getElementById('saved-chir').textContent='Salvato alle '+new Date().getHours()+':'+String(new Date().getMinutes()).padStart(2,'0');
+  showToast('Scheda salvata!');
 }
 
 async function salvaAltro() {
