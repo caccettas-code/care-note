@@ -356,9 +356,28 @@ input,textarea,button,select{font-family:var(--fnt);font-weight:700;}
     <div style="height:8px;"></div>
   </div>
 
+
+      <div class="group-label">Fotografie cliniche</div>
+      <div class="list">
+        <div style="padding:14px 16px;">
+          <div style="font-size:12px;color:#8E8E93;font-weight:700;text-transform:uppercase;letter-spacing:.4px;margin-bottom:10px;">Carica fotografie</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
+            <label style="flex:1;min-width:80px;height:44px;border-radius:10px;border:1.5px dashed rgba(142,158,154,.5);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:12px;color:#8E8E93;font-weight:700;background:rgba(142,158,154,.08);">
+              Pre <input type="file" accept="image/*" multiple style="display:none;" onchange="gestisciFoto(this,'pre','est')">
+            </label>
+            <label style="flex:1;min-width:80px;height:44px;border-radius:10px;border:1.5px dashed rgba(142,158,154,.5);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:12px;color:#8E8E93;font-weight:700;background:rgba(142,158,154,.08);">
+              Intra <input type="file" accept="image/*" multiple style="display:none;" onchange="gestisciFoto(this,'intra','est')">
+            </label>
+            <label style="flex:1;min-width:80px;height:44px;border-radius:10px;border:1.5px dashed rgba(142,158,154,.5);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:12px;color:#8E8E93;font-weight:700;background:rgba(142,158,154,.08);">
+              Post <input type="file" accept="image/*" multiple style="display:none;" onchange="gestisciFoto(this,'post','est')">
+            </label>
+          </div>
+          <div id="foto-grid-est" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;"></div>
+        </div>
+      </div>
   <div class="footer">
     <button class="fbtn fbtn-sec" onclick="newSchedaEst()" style="flex:0.7;font-size:13px;">+ Nuova</button>
-    <button class="fbtn fbtn-red" onclick="salvaPDFEst()">Salva PDF</button>
+    <button class="fbtn fbtn-red" onclick="salvaEst()">Salva</button>
     <button class="fbtn fbtn-green" onclick="inviaFirma()">Invia a firma</button>
   </div>
 </div>
@@ -603,9 +622,28 @@ input,textarea,button,select{font-family:var(--fnt);font-weight:700;}
       <div style="height:8px;"></div>
     </div>
 
+
+      <div class="group-label group-label-blue">Fotografie cliniche</div>
+      <div class="list list-blue">
+        <div style="padding:14px 16px;">
+          <div style="font-size:12px;color:#8E8E93;font-weight:700;text-transform:uppercase;letter-spacing:.4px;margin-bottom:10px;">Carica fotografie</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
+            <label style="flex:1;min-width:80px;height:44px;border-radius:10px;border:1.5px dashed rgba(142,158,154,.5);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:12px;color:#8E8E93;font-weight:700;background:rgba(142,158,154,.08);">
+              Pre <input type="file" accept="image/*" multiple style="display:none;" onchange="gestisciFoto(this,'pre','chir')">
+            </label>
+            <label style="flex:1;min-width:80px;height:44px;border-radius:10px;border:1.5px dashed rgba(142,158,154,.5);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:12px;color:#8E8E93;font-weight:700;background:rgba(142,158,154,.08);">
+              Intra <input type="file" accept="image/*" multiple style="display:none;" onchange="gestisciFoto(this,'intra','chir')">
+            </label>
+            <label style="flex:1;min-width:80px;height:44px;border-radius:10px;border:1.5px dashed rgba(142,158,154,.5);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:12px;color:#8E8E93;font-weight:700;background:rgba(142,158,154,.08);">
+              Post <input type="file" accept="image/*" multiple style="display:none;" onchange="gestisciFoto(this,'post','chir')">
+            </label>
+          </div>
+          <div id="foto-grid-chir" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;"></div>
+        </div>
+      </div>
     <div class="footer">
       <button class="fbtn fbtn-sec" onclick="newSchedaChir()" style="flex:0.7;font-size:13px;">+ Nuova</button>
-      <button class="fbtn fbtn-blue" onclick="salvaPDFChir()">Salva PDF</button>
+      <button class="fbtn fbtn-blue" onclick="salvaChir()">Salva</button>
       <button class="fbtn fbtn-green" onclick="inviaFirma()">Invia a firma</button>
     </div>
   </div>
@@ -750,7 +788,7 @@ input,textarea,button,select{font-family:var(--fnt);font-weight:700;}
 
   <div class="footer">
     <button class="fbtn fbtn-sec" onclick="newSchedaAltro()" style="flex:0.7;font-size:13px;">+ Nuova</button>
-    <button class="fbtn fbtn-blue" onclick="salvaPDFAltro()">Salva PDF</button>
+    <button class="fbtn fbtn-blue" onclick="salvaAltro()">Salva</button>
     <button class="fbtn fbtn-green" onclick="inviaFirma()">Invia a firma</button>
   </div>
 </div>
@@ -2058,6 +2096,312 @@ function stampaConsenso(key){
   var filename='Consenso_'+key.replace(/-/g,'_')+'_'+new Date().toISOString().split('T')[0]+'.pdf';
   doc.save(filename);
   showToast('PDF salvato!');
+}
+
+
+// ── SUPABASE ──────────────────────────────────────────────────────────────────
+var SB_URL = 'https://bikfwlnzczbvgzsanfwc.supabase.co';
+var SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJpa2Z3bG56Y3pidmd6c2FuZndjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMxNzI5NzgsImV4cCI6MjA5ODc0ODk3OH0.gUiR3uEwbBHN1t_z-ec8d_uDBpiJgLRprf3x3rtd1ok';
+
+function sbHeaders() {
+  return {
+    'Content-Type': 'application/json',
+    'apikey': SB_KEY,
+    'Authorization': 'Bearer ' + SB_KEY,
+    'Prefer': 'return=representation'
+  };
+}
+
+async function sbSalvaScheda(tipo, cognome, nome, dati) {
+  try {
+    var res = await fetch(SB_URL + '/rest/v1/schede', {
+      method: 'POST',
+      headers: sbHeaders(),
+      body: JSON.stringify({
+        tipo: tipo,
+        cognome: cognome || '',
+        nome: nome || '',
+        data_nascita: dati['e-dob'] || dati['c-dob'] || '',
+        dati: dati
+      })
+    });
+    var rows = await res.json();
+    if(Array.isArray(rows) && rows[0]) return rows[0].id;
+    return null;
+  } catch(e) {
+    console.error('Supabase save error:', e);
+    return null;
+  }
+}
+
+async function sbAggiornalScheda(id, tipo, cognome, nome, dati) {
+  try {
+    await fetch(SB_URL + '/rest/v1/schede?id=eq.' + id, {
+      method: 'PATCH',
+      headers: Object.assign({}, sbHeaders(), {'Prefer': 'return=minimal'}),
+      body: JSON.stringify({
+        tipo: tipo,
+        cognome: cognome || '',
+        nome: nome || '',
+        data_nascita: dati['e-dob'] || dati['c-dob'] || '',
+        dati: dati,
+        updated_at: new Date().toISOString()
+      })
+    });
+    return true;
+  } catch(e) {
+    console.error('Supabase update error:', e);
+    return false;
+  }
+}
+
+async function sbCaricaFoto(schedaId, file, tipofoto) {
+  try {
+    var ext = file.name.split('.').pop();
+    var path = schedaId + '/' + tipofoto + '_' + Date.now() + '.' + ext;
+    // Upload to storage
+    var uploadRes = await fetch(SB_URL + '/storage/v1/object/foto-pazienti/' + path, {
+      method: 'POST',
+      headers: {
+        'apikey': SB_KEY,
+        'Authorization': 'Bearer ' + SB_KEY,
+        'Content-Type': file.type
+      },
+      body: file
+    });
+    if(!uploadRes.ok) throw new Error('Upload failed: ' + uploadRes.status);
+    var url = SB_URL + '/storage/v1/object/public/foto-pazienti/' + path;
+    // Save reference in foto table
+    await fetch(SB_URL + '/rest/v1/foto', {
+      method: 'POST',
+      headers: sbHeaders(),
+      body: JSON.stringify({
+        scheda_id: schedaId,
+        nome_file: file.name,
+        url: url,
+        tipo: tipofoto
+      })
+    });
+    return url;
+  } catch(e) {
+    console.error('Foto upload error:', e);
+    return null;
+  }
+}
+
+async function sbGetFoto(schedaId) {
+  try {
+    var res = await fetch(SB_URL + '/rest/v1/foto?scheda_id=eq.' + schedaId + '&order=created_at.asc', {
+      headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY }
+    });
+    return await res.json();
+  } catch(e) { return []; }
+}
+
+async function sbGetSchede() {
+  try {
+    var res = await fetch(SB_URL + '/rest/v1/schede?order=updated_at.desc&limit=500', {
+      headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY }
+    });
+    return await res.json();
+  } catch(e) { return []; }
+}
+
+// Raccogli tutti i dati del form corrente
+function raccogliDatiEst() {
+  var data = {tipo:'est'};
+  Object.assign(data, ynState);
+  var FIELDS_E = ['e-cognome','e-nome','e-dob','e-sesso','e-tel','e-email','e-area','e-diagnosi','ea1n','ea2n','ea3n','ea4n','ea5n','ea6n','ea7n','ea8n','ea9n','ea10n','ea11n','ea12n','ea13n','eapn','efarmn','e-anam','e-tratt','e-prod','e-zona','e-dose','e-sedute','e-note','e-data-tratt','e-followup','e-data-scheda'];
+  FIELDS_E.forEach(function(id){ var el=document.getElementById(id); if(el) data[id]=el.value; });
+  return data;
+}
+
+function raccogliDatiChir() {
+  var data = {tipo:'chir', intervento:'mammella'};
+  Object.assign(data, ynState);
+  var FIELDS_C = ['c-cognome','c-nome','c-dob','c-altezza','c-peso','c-bmi','c-tel','c-email','c-taglia-att','c-taglia-des','c-figli','c-ciclo','c-tos','ca1n','ca2n','ca3n','ca4n','ca4bn','ca5n','ca6n','ca7n','ca8n','ca9n','bap-circ-imf','bap-bw-dx','bap-bw-sx','bap-nimf-dx','bap-nimf-sx','bap-ssn-dx','bap-ssn-sx','bap-prot-note','prot-marca','prot-forma','prot-surf','prot-vol-dx','prot-vol-sx','prot-profilo','eo-note','eo-ptosi-dx','eo-ptosi-sx','op-intervento','op-incisione','op-tasca','op-anestesia','op-ricovero','op-data','op-reggiseno','op-note','c-data-scheda'];
+  FIELDS_C.forEach(function(id){ var el=document.getElementById(id); if(el) data[id]=el.value; });
+  return data;
+}
+
+// IDs Supabase per la scheda corrente
+var sbIdEst = null;
+var sbIdChir = null;
+
+async function salvaEst() {
+  showToast('Salvataggio in corso...');
+  var dati = raccogliDatiEst();
+  var cognome = dati['e-cognome'] || '';
+  var nome = dati['e-nome'] || '';
+  
+  // Save to localStorage
+  var lsKey = 'sc_est_' + (schedaIdEst || Date.now());
+  dati.id = lsKey;
+  dati.ts = new Date().toISOString();
+  localStorage.setItem(lsKey, JSON.stringify(dati));
+  localStorage.setItem('sc_last_est', lsKey);
+  
+  // Save to Supabase
+  var sbId;
+  if(sbIdEst) {
+    await sbAggiornalScheda(sbIdEst, 'est', cognome, nome, dati);
+    sbId = sbIdEst;
+  } else {
+    sbId = await sbSalvaScheda('est', cognome, nome, dati);
+    sbIdEst = sbId;
+  }
+  
+  // Generate and download PDF
+  salvaPDFEst();
+  
+  document.getElementById('dot-est').style.background='#30D158';
+  document.getElementById('saved-est').textContent='Salvato alle '+new Date().getHours()+':'+String(new Date().getMinutes()).padStart(2,'0');
+}
+
+async function salvaChir() {
+  showToast('Salvataggio in corso...');
+  var dati = raccogliDatiChir();
+  var cognome = dati['c-cognome'] || '';
+  var nome = dati['c-nome'] || '';
+  
+  // Save to localStorage
+  var lsKey = 'sc_chir_' + (schedaIdChir || Date.now());
+  dati.id = lsKey;
+  dati.ts = new Date().toISOString();
+  localStorage.setItem(lsKey, JSON.stringify(dati));
+  localStorage.setItem('sc_last_chir', lsKey);
+  
+  // Save to Supabase
+  var sbId;
+  if(sbIdChir) {
+    await sbAggiornalScheda(sbIdChir, 'chir', cognome, nome, dati);
+    sbId = sbIdChir;
+  } else {
+    sbId = await sbSalvaScheda('chir', cognome, nome, dati);
+    sbIdChir = sbId;
+  }
+  
+  // Generate and download PDF
+  salvaPDFChir();
+  
+  document.getElementById('dot-chir').style.background='#30D158';
+  document.getElementById('saved-chir').textContent='Salvato alle '+new Date().getHours()+':'+String(new Date().getMinutes()).padStart(2,'0');
+}
+
+async function salvaAltro() {
+  salvaPDFAltro();
+}
+
+// ── STORICO: carica da Supabase ───────────────────────────────────────────────
+async function aggiornaStorico() {
+  document.getElementById('storico-stats').textContent='Caricamento...';
+  document.getElementById('storico-lista').innerHTML='';
+  
+  // Load from Supabase
+  var schede = await sbGetSchede();
+  
+  // Merge with localStorage (offline fallback)
+  var lsSchede = getAllSchede();
+  var sbIds = new Set(schede.map(function(s){ return s.id; }));
+  
+  // Convert Supabase format to display format
+  var tutte = schede.map(function(s) {
+    var d = s.dati || {};
+    return {
+      key: 'sb_' + s.id,
+      sbId: s.id,
+      tipo: s.tipo,
+      cognome: s.cognome || d['e-cognome'] || d['c-cognome'] || '',
+      nome: s.nome || d['e-nome'] || d['c-nome'] || '',
+      nomeCompleto: ((s.cognome||'') + ' ' + (s.nome||'')).trim(),
+      area: d['e-area'] || '',
+      diagnosi: d['e-diagnosi'] || '',
+      trattamento: d['e-tratt'] || '',
+      intervento: d['op-intervento'] || '',
+      prodotto: d['e-prod'] || '',
+      note: d['e-note'] || d['op-note'] || '',
+      ts: s.updated_at || s.created_at || '',
+      dataTratt: d['e-data-tratt'] || d['op-data'] || '',
+      raw: d
+    };
+  });
+  
+  // Add localStorage entries not in Supabase
+  lsSchede.forEach(function(s) {
+    if(!tutte.find(function(t){ return t.nomeCompleto===s.nomeCompleto && t.tipo===s.tipo; })) {
+      tutte.push(s);
+    }
+  });
+  
+  tutte.sort(function(a,b){ return (b.ts||'').localeCompare(a.ts||''); });
+  
+  storicoTutteSchede = tutte;
+  renderSchede(tutte.filter(function(s){
+    if(storicoFilter==='est') return s.tipo==='est';
+    if(storicoFilter==='chir') return s.tipo==='chir';
+    return true;
+  }), '');
+}
+
+var storicoTutteSchede = [];
+
+// ── FOTO ──────────────────────────────────────────────────────────────────────
+async function gestisciFoto(input, tipo, sezione) {
+  var files = input.files;
+  if(!files||!files.length) return;
+  var gridId = 'foto-grid-' + sezione;
+  var grid = document.getElementById(gridId);
+  
+  for(var i=0;i<files.length;i++) {
+    var file = files[i];
+    // Show preview immediately
+    var reader = new FileReader();
+    reader.onload = (function(f, t) {
+      return function(e) {
+        var div = document.createElement('div');
+        div.style.cssText = 'position:relative;border-radius:10px;overflow:hidden;aspect-ratio:1;background:#eee;';
+        div.innerHTML = '<img src="'+e.target.result+'" style="width:100%;height:100%;object-fit:cover;">'
+          +'<div style="position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.5);color:#fff;font-size:9px;font-weight:700;padding:3px 5px;text-transform:uppercase;">'+t+'</div>';
+        if(grid) grid.appendChild(div);
+        
+        // Upload to Supabase if we have a scheda ID
+        var sbId = sezione==='est' ? sbIdEst : sbIdChir;
+        if(sbId) {
+          sbCaricaFoto(sbId, f, t).then(function(url) {
+            if(url) console.log('Foto caricata:', url);
+          });
+        } else {
+          // Will upload after save
+          pendingFotos.push({file: f, tipo: t, sezione: sezione});
+        }
+      };
+    })(file, tipo);
+    reader.readAsDataURL(file);
+  }
+}
+
+var pendingFotos = [];
+
+async function uploadPendingFotos(sbId, sezione) {
+  var toUpload = pendingFotos.filter(function(p){ return p.sezione===sezione; });
+  for(var i=0;i<toUpload.length;i++) {
+    await sbCaricaFoto(sbId, toUpload[i].file, toUpload[i].tipo);
+  }
+  pendingFotos = pendingFotos.filter(function(p){ return p.sezione!==sezione; });
+}
+
+async function caricaFotoScheda(sbId, sezione) {
+  var foto = await sbGetFoto(sbId);
+  var grid = document.getElementById('foto-grid-' + sezione);
+  if(!grid||!foto||!foto.length) return;
+  grid.innerHTML = '';
+  foto.forEach(function(f) {
+    var div = document.createElement('div');
+    div.style.cssText = 'position:relative;border-radius:10px;overflow:hidden;aspect-ratio:1;background:#eee;';
+    div.innerHTML = '<img src="'+f.url+'" style="width:100%;height:100%;object-fit:cover;">'
+      +'<div style="position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.5);color:#fff;font-size:9px;font-weight:700;padding:3px 5px;text-transform:uppercase;">'+f.tipo+'</div>';
+    grid.appendChild(div);
+  });
 }
 
 if('serviceWorker' in navigator){
