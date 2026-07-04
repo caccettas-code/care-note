@@ -3,6 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Schede Cliniche">
+<meta name="theme-color" content="#BEC6C3">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
 <title>Dr. Simone Caccetta</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
@@ -13,45 +19,47 @@
   --txt:#1C1C1E;--txt3:#8E8E93;
   --fnt:"Helvetica Neue",Helvetica,Arial,sans-serif;
 }
-body{font-family:var(--fnt);font-weight:700;background:var(--bg);min-height:100vh;color:var(--txt);font-size:16px;padding-bottom:88px;}
+body{font-family:var(--fnt);font-weight:700;background:linear-gradient(160deg,#EEF1F0 0%,#E4EAEA 100%);min-height:100vh;color:var(--txt);font-size:16px;padding-bottom:88px;}
 input,textarea,button,select{font-family:var(--fnt);font-weight:700;}
 
 /* ── HOME ── */
-.home{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:32px 24px;background:linear-gradient(170deg,#F0F0F5 0%,#E4E4EC 100%);}
-.home-logo{font-size:22px;font-weight:700;color:var(--txt);margin-bottom:4px;letter-spacing:-.3px;}
+.home{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:32px 24px;background:linear-gradient(170deg,#C8D0CD 0%,#BEC6C3 100%);}
+.home-logo{font-size:22px;font-weight:700;color:#1C1C1E;margin-bottom:4px;letter-spacing:-.3px;}
 .home-sub{font-size:14px;color:var(--txt3);font-weight:400;margin-bottom:48px;text-align:center;}
 .home-cards{display:flex;flex-direction:column;gap:16px;width:100%;max-width:400px;}
 .home-card{border-radius:18px;padding:28px 24px;cursor:pointer;display:flex;align-items:center;gap:20px;box-shadow:0 2px 12px rgba(0,0,0,.08);transition:transform .1s;}
 .home-card:active{transform:scale(.97);}
-.home-card-est{background:linear-gradient(135deg,#D44D3D,#B03A2E);}
-.home-card-chir{background:linear-gradient(135deg,#3A8CC5,#2171A8);}
+.home-card-est{background:rgba(142,158,154,.55);backdrop-filter:blur(12px);border:1px solid rgba(142,158,154,.35);}
+.home-card-chir{background:rgba(110,132,128,.55);backdrop-filter:blur(12px);border:1px solid rgba(110,132,128,.35);}
+.home-card-docs{background:rgba(160,155,145,.45);backdrop-filter:blur(12px);border:1px solid rgba(150,145,135,.35);}
+.home-card-storico{background:rgba(130,140,148,.45);backdrop-filter:blur(12px);border:1px solid rgba(120,130,138,.35);}
 .home-card-icon{font-size:36px;flex-shrink:0;}
 .home-card-text{}
-.home-card-title{font-size:18px;font-weight:700;color:#fff;margin-bottom:4px;}
-.home-card-desc{font-size:13px;color:rgba(255,255,255,.75);font-weight:400;line-height:1.4;}
+.home-card-title{font-size:18px;font-weight:700;color:#1C1C1E;margin-bottom:4px;}
+.home-card-desc{font-size:13px;color:rgba(0,0,0,.55);font-weight:400;line-height:1.4;}
 
 /* ── HEADER ── */
 .hdr{padding:20px 20px 18px;position:sticky;top:0;z-index:100;}
-.hdr-est{background:linear-gradient(175deg,#D44D3D,#B03A2E);}
-.hdr-chir{background:linear-gradient(175deg,#3A8CC5,#2171A8);}
+.hdr-est{background:rgba(190,198,195,.85);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:0.5px solid rgba(142,158,154,.3);}
+.hdr-chir{background:rgba(178,190,187,.85);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:0.5px solid rgba(142,158,154,.3);}
 .hdr-top{display:flex;align-items:center;gap:12px;}
-.hdr-back{color:rgba(255,255,255,.8);font-size:14px;font-weight:400;cursor:pointer;background:rgba(255,255,255,.15);border:none;border-radius:20px;padding:5px 12px;}
-.hdr-name{color:#fff;font-size:17px;flex:1;}
-.hdr-sub{color:rgba(255,255,255,.7);font-size:11px;font-weight:400;margin-top:2px;}
+.hdr-back{color:rgba(0,0,0,.65);font-size:14px;font-weight:400;cursor:pointer;background:rgba(0,0,0,.1);border:none;border-radius:20px;padding:5px 12px;}
+.hdr-name{color:#1C1C1E;font-size:17px;flex:1;}
+.hdr-sub{color:rgba(0,0,0,.5);font-size:11px;font-weight:400;margin-top:2px;}
 
 
 .dot{width:7px;height:7px;border-radius:50%;background:#30D158;flex-shrink:0;}
-.saved-txt{color:rgba(255,255,255,.9);font-size:12px;}
+.saved-txt{color:rgba(0,0,0,.65);font-size:12px;}
 
 
 /* ── TABS ── */
-.tabs-est{background:rgba(242,242,247,.95);backdrop-filter:blur(20px);border-bottom:0.5px solid var(--sep);position:sticky;top:80px;z-index:99;padding:0 16px;}
-.tabs-chir{background:rgba(232,244,253,.95);backdrop-filter:blur(20px);border-bottom:0.5px solid rgba(33,118,174,.15);position:sticky;top:80px;z-index:99;padding:0 16px;}
+.tabs-est{background:rgba(238,241,240,.95);backdrop-filter:blur(20px);border-bottom:0.5px solid rgba(142,158,154,.2);position:sticky;top:80px;z-index:99;padding:0 16px;}
+.tabs-chir{background:rgba(238,241,240,.95);backdrop-filter:blur(20px);border-bottom:0.5px solid rgba(142,158,154,.2);position:sticky;top:80px;z-index:99;padding:0 16px;}
 .tabs-inner{display:flex;}
 .tab-est{flex:1;padding:10px 2px 9px;text-align:center;font-size:12px;color:var(--txt3);border:none;background:none;border-bottom:2.5px solid transparent;cursor:pointer;font-weight:700;}
-.tab-est.active{color:var(--red);border-bottom-color:var(--red);}
+.tab-est.active{color:var(--sage-d);border-bottom-color:var(--sage-d);}
 .tab-chir{flex:1;padding:10px 2px 9px;text-align:center;font-size:12px;color:var(--txt3);border:none;background:none;border-bottom:2.5px solid transparent;cursor:pointer;font-weight:700;}
-.tab-chir.active{color:var(--blue);border-bottom-color:var(--blue);}
+.tab-chir.active{color:var(--sage-d);border-bottom-color:var(--sage-d);}
 
 .page{display:none;padding:20px 16px 0;}
 .page.active{display:block;}
@@ -59,9 +67,9 @@ input,textarea,button,select{font-family:var(--fnt);font-weight:700;}
 /* ── LISTS ── */
 .group-label{font-size:12px;color:var(--txt3);text-transform:uppercase;letter-spacing:.5px;padding:0 16px 6px;margin-top:20px;}
 .group-label:first-child{margin-top:0;}
-.group-label-blue{color:var(--blue);}
+.group-label-blue{color:var(--sage-d);}
 .list{background:var(--card);border-radius:14px;overflow:hidden;}
-.list-blue{border:1px solid rgba(33,118,174,.12);}
+.list-blue{border:1px solid rgba(142,158,154,.2);}
 .row{display:flex;align-items:center;border-bottom:0.5px solid var(--sep);min-height:48px;}
 .row:last-child{border-bottom:none;}
 .row-lbl{font-size:15px;color:var(--txt);padding:14px 12px 14px 16px;min-width:130px;flex-shrink:0;}
@@ -88,7 +96,7 @@ input,textarea,button,select{font-family:var(--fnt);font-weight:700;}
 .consenso-picker{padding:16px;}
 .consenso-picker select{width:100%;height:48px;border:1.5px solid var(--sep);border-radius:12px;background:var(--bg);font-size:15px;font-weight:700;color:var(--txt);padding:0 14px;outline:none;-webkit-appearance:none;}
 .consenso-body{margin:0 16px 16px;background:var(--bg);border-radius:12px;padding:16px;border:0.5px solid var(--sep);}
-.consenso-body h2{font-size:15px;color:var(--red);margin-bottom:4px;}
+.consenso-body h2{font-size:15px;color:var(--sage-d);margin-bottom:4px;}
 .consenso-body h3{font-size:12px;color:var(--txt3);font-weight:700;margin-bottom:14px;}
 .consenso-testo{font-size:13px;color:var(--txt);line-height:1.7;white-space:pre-wrap;font-weight:400;max-height:280px;overflow-y:auto;border-bottom:0.5px solid var(--sep);padding-bottom:14px;margin-bottom:14px;}
 .consenso-punto{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:0.5px solid var(--sep);}
@@ -104,18 +112,18 @@ input,textarea,button,select{font-family:var(--fnt);font-weight:700;}
 .firma-placeholder{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:var(--txt3);font-size:13px;pointer-events:none;}
 .firma-clear{margin-top:8px;background:none;border:none;color:var(--red);font-size:13px;font-weight:600;padding:4px 0;cursor:pointer;}
 .bap-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
-.bap-side{background:var(--blue-l);border-radius:12px;padding:14px;border:1px solid rgba(33,118,174,.15);}
-.bap-side-title{font-size:11px;color:var(--blue);text-transform:uppercase;font-weight:700;margin-bottom:8px;}
+.bap-side{background:#E8EDEB;border-radius:12px;padding:14px;border:1px solid rgba(142,158,154,.25);}
+.bap-side-title{font-size:11px;color:var(--sage-d);text-transform:uppercase;font-weight:700;margin-bottom:8px;}
 .bap-side-content{font-size:13px;color:var(--txt);line-height:1.7;font-weight:700;}
 .bap-warn{margin-top:12px;font-size:13px;color:#C0392B;font-weight:400;line-height:1.5;}
 
 /* ── FOOTER ── */
 .footer{position:fixed;bottom:0;left:0;right:0;padding:10px 16px calc(10px + env(safe-area-inset-bottom));background:rgba(242,242,247,.92);backdrop-filter:blur(24px);border-top:0.5px solid var(--sep);display:flex;gap:10px;}
 .fbtn{flex:1;height:50px;border-radius:13px;border:none;font-family:var(--fnt);font-weight:700;font-size:15px;cursor:pointer;}
-.fbtn-sec{background:rgba(255,255,255,.85);color:var(--txt);border:0.5px solid var(--sep);}
-.fbtn-red{background:linear-gradient(175deg,#D44D3D,#B03A2E);color:#fff;}
-.fbtn-blue{background:linear-gradient(175deg,#3A8CC5,#2171A8);color:#fff;}
-.fbtn-green{background:linear-gradient(175deg,#34C759,#28a548);color:#fff;font-size:13px;}
+.fbtn-sec{background:rgba(255,255,255,.45);color:#1C1C1E;backdrop-filter:blur(8px);border:0.5px solid rgba(142,158,154,.3);}
+.fbtn-red{background:rgba(110,132,128,.75);color:#1C1C1E;backdrop-filter:blur(8px);border:1px solid rgba(110,132,128,.3);}
+.fbtn-blue{background:rgba(110,132,128,.75);color:#1C1C1E;backdrop-filter:blur(8px);border:1px solid rgba(110,132,128,.3);}
+.fbtn-green{background:rgba(110,132,128,.55);color:#1C1C1E;backdrop-filter:blur(8px);border:1px solid rgba(110,132,128,.25);font-size:13px;}
 
 /* ── MODAL FIRMA ── */
 #ys-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:200;padding:20px;align-items:center;justify-content:center;}
@@ -127,8 +135,20 @@ input,textarea,button,select{font-family:var(--fnt);font-weight:700;}
 #ys-status{font-size:13px;color:var(--red);margin-bottom:12px;min-height:18px;font-weight:400;}
 .ys-btns{display:flex;gap:10px;}
 .ys-btn-cancel{flex:1;height:46px;border-radius:12px;border:1.5px solid var(--sep);background:var(--bg);font-size:15px;font-weight:700;cursor:pointer;font-family:var(--fnt);}
-.ys-btn-send{flex:1;height:46px;border-radius:12px;border:none;background:linear-gradient(175deg,#34C759,#28a548);color:#fff;font-size:15px;font-weight:700;cursor:pointer;font-family:var(--fnt);}
+.ys-btn-send{flex:1;height:46px;border-radius:12px;border:1px solid rgba(110,132,128,.3);background:rgba(110,132,128,.65);color:#1C1C1E;font-size:15px;font-weight:700;cursor:pointer;font-family:var(--fnt);backdrop-filter:blur(8px);}
 
+.filter-pill{background:rgba(255,255,255,.5);border:0.5px solid rgba(142,158,154,.3);border-radius:20px;padding:6px 14px;font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;font-weight:700;font-size:12px;color:#3A3A3C;cursor:pointer;backdrop-filter:blur(8px);}
+.filter-pill.active{background:rgba(142,158,154,.7);color:#1C1C1E;border-color:rgba(142,158,154,.5);}
+.scheda-card{background:rgba(255,255,255,.75);border-radius:14px;border:0.5px solid rgba(142,158,154,.2);padding:16px;cursor:pointer;transition:transform .1s;}
+.scheda-card:active{transform:scale(.98);}
+.scheda-card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+.scheda-card-name{font-size:16px;font-weight:700;color:#1C1C1E;}
+.scheda-card-badge{font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;}
+.badge-est{background:rgba(192,57,43,.12);color:#C0392B;}
+.badge-chir{background:rgba(142,158,154,.2);color:#4A6460;}
+.scheda-card-info{font-size:13px;color:#3A3A3C;font-weight:400;line-height:1.5;}
+.scheda-card-meta{font-size:11px;color:#8E8E93;font-weight:400;margin-top:6px;}
+.scheda-card-highlight{background:rgba(255,220,0,.25);border-radius:3px;padding:0 2px;}
 #toast{display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,.82);color:#fff;padding:16px 24px;border-radius:14px;font-size:15px;z-index:999;text-align:center;line-height:1.6;max-width:280px;}
 </style>
 </head>
@@ -150,6 +170,18 @@ input,textarea,button,select{font-family:var(--fnt);font-weight:700;}
       <div class="home-card-text">
         <div class="home-card-title">Chirurgia</div>
         <div class="home-card-desc">Programmazione interventi chirurgici</div>
+      </div>
+    </div>
+    <div class="home-card home-card-docs" onclick="openSection('docs')">
+      <div class="home-card-text">
+        <div class="home-card-title">Documenti</div>
+        <div class="home-card-desc">Consensi informativi e schede per il paziente</div>
+      </div>
+    </div>
+    <div class="home-card home-card-storico" onclick="openSection('storico')">
+      <div class="home-card-text">
+        <div class="home-card-title">Storico Pazienti</div>
+        <div class="home-card-desc">Cerca e consulta le schede archiviate</div>
       </div>
     </div>
   </div>
@@ -454,16 +486,21 @@ input,textarea,button,select{font-family:var(--fnt);font-weight:700;}
     <div class="page" id="chir-tab3">
       <div class="group-label group-label-blue">BAP — Breast Augmentation Planning (Per Heiden)</div>
       <div class="list list-blue">
+        <div class="row-area-lbl">Protesi mammarie esistenti</div>
+        <div class="trow"><span class="trow-lbl">Protesi mammarie già presenti</span><div class="yn"><button class="yn-btn" data-key="bap-prot-exist" data-val="si">Sì</button><button class="yn-btn" data-key="bap-prot-exist" data-val="no">No</button></div></div>
+        <div class="row-area" id="bap-prot-exist-note-row" style="display:none;">
+          <textarea id="bap-prot-note" placeholder="Specificare: marca, modello, volume, anno impianto, via d'accesso, tasca..." style="min-height:80px;" oninput="schedula()"></textarea>
+        </div>
         <div class="row"><span class="row-lbl">Circ. torace IMF (cm)</span><input id="bap-circ-imf" type="number" step="0.1" placeholder="cm" oninput="calcolaTagliaReggiseno()"></div>
         <div class="row-area-lbl">Misurazioni bilaterali (cm)</div>
-        <div class="row"><span class="row-lbl">Base Width DX</span><input id="bap-bw-dx" type="number" step="0.1" placeholder="cm" oninput="calcBAP()"></div>
-        <div class="row"><span class="row-lbl">Base Width SX</span><input id="bap-bw-sx" type="number" step="0.1" placeholder="cm" oninput="calcBAP()"></div>
-        <div class="row"><span class="row-lbl">N-IMF stretch DX</span><input id="bap-nimf-dx" type="number" step="0.1" placeholder="cm" oninput="calcBAP()"></div>
-        <div class="row"><span class="row-lbl">N-IMF stretch SX</span><input id="bap-nimf-sx" type="number" step="0.1" placeholder="cm" oninput="calcBAP()"></div>
-        <div class="row"><span class="row-lbl">Pinch test DX</span><input id="bap-pm-dx" type="number" step="0.1" placeholder="cm" oninput="calcBAP()"></div>
-        <div class="row"><span class="row-lbl">Pinch test SX</span><input id="bap-pm-sx" type="number" step="0.1" placeholder="cm" oninput="calcBAP()"></div>
-        <div class="row"><span class="row-lbl">SSN-N DX</span><input id="bap-ssn-dx" type="number" step="0.1" placeholder="cm" oninput="calcBAP()"></div>
-        <div class="row"><span class="row-lbl">SSN-N SX</span><input id="bap-ssn-sx" type="number" step="0.1" placeholder="cm" oninput="calcBAP()"></div>
+        <div class="row"><span class="row-lbl">Larghezza base DX</span><input id="bap-bw-dx" type="number" step="0.1" placeholder="cm" oninput="calcBAP()"></div>
+        <div class="row"><span class="row-lbl">Larghezza base SX</span><input id="bap-bw-sx" type="number" step="0.1" placeholder="cm" oninput="calcBAP()"></div>
+        <div class="row"><span class="row-lbl">Capezzolo-solco in stretch DX</span><input id="bap-nimf-dx" type="number" step="0.1" placeholder="cm" oninput="calcBAP()"></div>
+        <div class="row"><span class="row-lbl">Capezzolo-solco in stretch SX</span><input id="bap-nimf-sx" type="number" step="0.1" placeholder="cm" oninput="calcBAP()"></div>
+        <div class="row-area-lbl">Pinch test (unico valore bilaterale)</div>
+        <div class="trow"><span class="trow-lbl">Pinch test</span><div class="yn"><button class="yn-btn" data-key="bap-pinch" data-val="gt2">&gt; 2 cm</button><button class="yn-btn" data-key="bap-pinch" data-val="lt2">&lt; 2 cm</button></div></div>
+        <div class="row"><span class="row-lbl">Dist. giugulo-capezzolo DX</span><input id="bap-ssn-dx" type="number" step="0.1" placeholder="cm" oninput="calcBAP()"></div>
+        <div class="row"><span class="row-lbl">Dist. giugulo-capezzolo SX</span><input id="bap-ssn-sx" type="number" step="0.1" placeholder="cm" oninput="calcBAP()"></div>
       </div>
       <div class="group-label group-label-blue">Risultato BAP</div>
       <div class="list list-blue bap-result" id="bap-result">
@@ -719,6 +756,114 @@ input,textarea,button,select{font-family:var(--fnt);font-weight:700;}
 </div>
 </div>
 
+
+
+<!-- ══ APP STORICO ══ -->
+<div id="app-storico" style="display:none;">
+  <div class="hdr" style="background:rgba(165,172,178,.85);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:0.5px solid rgba(140,150,155,.3);">
+    <div class="hdr-top">
+      <button class="hdr-back" onclick="goHome()">← Home</button>
+      <div>
+        <div class="hdr-name">Storico Pazienti</div>
+        <div class="hdr-sub">Dr. Simone Caccetta</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="padding:16px 16px 0;">
+    <!-- Search bar -->
+    <div style="background:rgba(255,255,255,.7);border-radius:14px;border:0.5px solid rgba(142,158,154,.25);display:flex;align-items:center;padding:0 14px;margin-bottom:16px;">
+      <span style="font-size:16px;color:#8E8E93;margin-right:8px;">🔍</span>
+      <input id="storico-search" type="text"
+        placeholder="Cerca per nome, diagnosi, procedura, area..."
+        style="flex:1;border:none;outline:none;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-weight:700;font-size:15px;color:#1C1C1E;background:transparent;padding:14px 0;"
+        oninput="cercaSchede(this.value)">
+      <button onclick="document.getElementById('storico-search').value='';cercaSchede('');" style="border:none;background:none;color:#8E8E93;font-size:18px;cursor:pointer;padding:0 0 0 8px;">✕</button>
+    </div>
+
+    <!-- Filter pills -->
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;" id="storico-filters">
+      <button class="filter-pill active" onclick="setFilter('tutti')">Tutti</button>
+      <button class="filter-pill" onclick="setFilter('est')">Medicina Estetica</button>
+      <button class="filter-pill" onclick="setFilter('chir')">Chirurgia</button>
+    </div>
+
+    <!-- Stats bar -->
+    <div id="storico-stats" style="font-size:12px;color:#8E8E93;font-weight:700;text-transform:uppercase;letter-spacing:.4px;margin-bottom:10px;"></div>
+
+    <!-- Results list -->
+    <div id="storico-lista" style="display:flex;flex-direction:column;gap:10px;"></div>
+
+    <div style="height:40px;"></div>
+  </div>
+</div>
+
+<!-- ══ APP DOCUMENTI ══ -->
+<div id="app-docs" style="display:none;">
+  <div class="hdr" style="background:rgba(175,170,160,.85);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:0.5px solid rgba(142,138,130,.3);">
+    <div class="hdr-top">
+      <button class="hdr-back" onclick="goHome()">← Home</button>
+      <div>
+        <div class="hdr-name">Documenti</div>
+        <div class="hdr-sub">Dr. Simone Caccetta</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="padding:20px 16px 0;">
+
+    <!-- SKINCARE -->
+    <div class="group-label">Schede per il paziente</div>
+    <div class="list">
+      <div class="row" style="cursor:pointer;" onclick="stampaSkincare()">
+        <span class="row-lbl">Skincare viso — ISDIN</span>
+        <span style="color:var(--sage-d);font-size:15px;padding-right:16px;">Stampa ›</span>
+      </div>
+    </div>
+
+    <!-- CONSENSI MEDICINA ESTETICA -->
+    <div class="group-label">Consensi — Medicina Estetica</div>
+    <div class="list">
+      <div class="row" style="cursor:pointer;" onclick="stampaConsenso('btx')">
+        <span class="row-lbl">Tossina botulinica</span>
+        <span style="color:var(--sage-d);font-size:15px;padding-right:16px;">Stampa ›</span>
+      </div>
+      <div class="row" style="cursor:pointer;" onclick="stampaConsenso('filler')">
+        <span class="row-lbl">Filler — Acido ialuronico</span>
+        <span style="color:var(--sage-d);font-size:15px;padding-right:16px;">Stampa ›</span>
+      </div>
+      <div class="row" style="cursor:pointer;" onclick="stampaConsenso('biostimolazione')">
+        <span class="row-lbl">Biostimolazione</span>
+        <span style="color:var(--sage-d);font-size:15px;padding-right:16px;">Stampa ›</span>
+      </div>
+      <div class="row" style="cursor:pointer;" onclick="stampaConsenso('peeling')">
+        <span class="row-lbl">Peeling / PRX-T33</span>
+        <span style="color:var(--sage-d);font-size:15px;padding-right:16px;">Stampa ›</span>
+      </div>
+    </div>
+
+    <!-- CONSENSI CHIRURGIA -->
+    <div class="group-label">Consensi — Chirurgia Estetica</div>
+    <div class="list">
+      <div class="row" style="cursor:pointer;" onclick="stampaConsenso('mastopessi-additiva')">
+        <span class="row-lbl">Mastopessi e Mastoplastica additiva</span>
+        <span style="color:var(--sage-d);font-size:15px;padding-right:16px;">Stampa ›</span>
+      </div>
+    </div>
+
+    <!-- CONSENSO GENERICO -->
+    <div class="group-label">Consenso generico</div>
+    <div class="list">
+      <div class="row" style="cursor:pointer;" onclick="stampaConsenso('generico')">
+        <span class="row-lbl">Consenso generico</span>
+        <span style="color:var(--sage-d);font-size:15px;padding-right:16px;">Stampa ›</span>
+      </div>
+    </div>
+
+    <div style="height:40px;"></div>
+  </div>
+</div>
+
 <!-- ══ MODAL FIRMA ══ -->
 <div id="ys-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:200;padding:20px;align-items:center;justify-content:center;">
   <div class="ys-modal-inner">
@@ -804,7 +949,7 @@ var currentTabChir=0;
 var currentTabChirA=0;
 
 var FIELDS_EST=['e-data-scheda','e-cognome','e-nome','e-dob','e-lob','e-sesso','e-tel','e-email','e-area','e-diagnosi','ea1n','ea2n','ea3n','ea4n','ea5n','ea6n','ea7n','ea8n','ea9n','ea10n','ea11n','ea12n','ea13n','eapn','efarmn','e-anam','e-tratt','e-prod','e-zona','e-dose','e-sedute','e-note','e-data-tratt','e-followup','e-data-visita','e-cons-procedura'];
-var FIELDS_CHIR=['c-data-scheda','c-cognome','c-nome','c-dob','c-prof','c-altezza','c-peso','c-bmi','c-tel','c-email','ca1n','ca2n','ca3n','ca4n','ca4bn','ca5n','ca6n','ca7n','ca8n','ca9n','ca10n','ca11n','bap-circ-imf','bap-bw-dx','bap-bw-sx','bap-nimf-dx','bap-nimf-sx','bap-pm-dx','bap-pm-sx','bap-ssn-dx','bap-ssn-sx','prot-note','eo-torace-note','eo-note','eo-ptosi-dx','eo-ptosi-sx','op-reggiseno','op-note','c-data-visita','c-cons-procedura'];
+var FIELDS_CHIR=['c-data-scheda','c-cognome','c-nome','c-dob','c-prof','c-altezza','c-peso','c-bmi','c-tel','c-email','ca1n','ca2n','ca3n','ca4n','ca4bn','ca5n','ca6n','ca7n','ca8n','ca9n','ca10n','ca11n','bap-circ-imf','bap-bw-dx','bap-bw-sx','bap-nimf-dx','bap-nimf-sx','bap-ssn-dx','bap-ssn-sx','bap-prot-note','prot-note','eo-torace-note','eo-note','eo-ptosi-dx','eo-ptosi-sx','op-reggiseno','op-note','c-data-visita','c-cons-procedura'];
 var FIELDS_ALTRO=['a-data-scheda','a-cognome','a-nome','a-dob','a-prof','a-altezza','a-peso','a-bmi','a-tel','a-email','aa1n','aa2n','aa3n','aa4n','aa5n','aa6n','aa7n','aa8n','aa9n','aa10n','a-esame','a-note','a-data-visita','a-cons-procedura'];
 
 document.querySelectorAll('.yn-btn').forEach(function(btn){
@@ -1200,26 +1345,29 @@ function calcBAP(){
   var bwSx=parseFloat(document.getElementById('bap-bw-sx').value);
   var nimfDx=parseFloat(document.getElementById('bap-nimf-dx').value);
   var nimfSx=parseFloat(document.getElementById('bap-nimf-sx').value);
-  var pmDx=parseFloat(document.getElementById('bap-pm-dx').value);
-  var pmSx=parseFloat(document.getElementById('bap-pm-sx').value);
-  var hasDx=!isNaN(bwDx)||!isNaN(nimfDx)||!isNaN(pmDx);
-  var hasSx=!isNaN(bwSx)||!isNaN(nimfSx)||!isNaN(pmSx);
-  if(!hasDx&&!hasSx){document.getElementById('bap-result').style.display='none';return;}
-  function renderSide(bw,nimf,pm){
+  var pinch=ynState['bap-pinch']; // 'gt2' or 'lt2'
+  var hasDx=!isNaN(bwDx)||!isNaN(nimfDx);
+  var hasSx=!isNaN(bwSx)||!isNaN(nimfSx);
+  if(!hasDx&&!hasSx&&!pinch){document.getElementById('bap-result').style.display='none';return;}
+  function profilo(p){
+    if(!p)return null;
+    if(p==='gt2')return'Pinch > 2 cm — profilo basso/moderato, sottoghiandolare possibile';
+    return'Pinch < 2 cm — profilo alto, dual plane consigliato';
+  }
+  function renderSide(bw,nimf){
     var lines=[];
     var vol=bapVolume(bw);if(vol)lines.push('Volume: '+vol.min+'–'+vol.max+' cc');
-    if(bw)lines.push('BW: '+bw+' cm');
-    var prof=bapProfilo(pm);if(prof)lines.push(prof);
+    if(bw)lines.push('Larghezza base: '+bw+' cm');
+    var prof=profilo(pinch);if(prof)lines.push(prof);
     var solco=bapSolco(nimf);if(solco)lines.push('Solco: '+solco);
-    if(nimf)lines.push('N-IMF: '+nimf+' cm');
+    if(nimf)lines.push('Cap.-solco: '+nimf+' cm');
     return lines.join('<br>')||'—';
   }
-  document.getElementById('bap-out-dx').innerHTML=renderSide(bwDx,nimfDx,pmDx);
-  document.getElementById('bap-out-sx').innerHTML=renderSide(bwSx,nimfSx,pmSx);
+  document.getElementById('bap-out-dx').innerHTML=renderSide(bwDx,nimfDx);
+  document.getElementById('bap-out-sx').innerHTML=renderSide(bwSx,nimfSx);
   var notes=[];
-  if(!isNaN(bwDx)&&!isNaN(bwSx)&&Math.abs(bwDx-bwSx)>0.5)notes.push('⚠️ Asimmetria BW '+Math.abs(bwDx-bwSx).toFixed(1)+' cm — considerare volumi differenti');
-  if(!isNaN(pmDx)&&pmDx<1.5)notes.push('⚠️ DX: pinch mediale sottile — rischio rippling');
-  if(!isNaN(pmSx)&&pmSx<1.5)notes.push('⚠️ SX: pinch mediale sottile — rischio rippling');
+  if(!isNaN(bwDx)&&!isNaN(bwSx)&&Math.abs(bwDx-bwSx)>0.5)notes.push('⚠️ Asimmetria larghezza base '+Math.abs(bwDx-bwSx).toFixed(1)+' cm — considerare volumi differenti');
+  if(pinch==='lt2')notes.push('⚠️ Pinch < 2 cm — rischio rippling sottoghiandolare, valutare dual plane');
   document.getElementById('bap-note').innerHTML=notes.join('<br>');
   document.getElementById('bap-result').style.display='block';
   schedula();
@@ -1401,7 +1549,8 @@ function salvaPDFChir(){
     if(get('bap-circ-imf'))y=addField(doc,y,'Circ. torace IMF',get('bap-circ-imf')+' cm');
     y=addField(doc,y,'BW DX / SX',get('bap-bw-dx')+' / '+get('bap-bw-sx')+' cm');
     y=addField(doc,y,'N-IMF DX / SX',get('bap-nimf-dx')+' / '+get('bap-nimf-sx')+' cm');
-    y=addField(doc,y,'Pinch test DX / SX',get('bap-pm-dx')+' / '+get('bap-pm-sx')+' cm');
+    var pinchVal=ynState['bap-pinch']==='gt2'?'> 2 cm':ynState['bap-pinch']==='lt2'?'< 2 cm':'—';
+    y=addField(doc,y,'Pinch test',pinchVal);
     y=addField(doc,y,'SSN-N DX / SX',get('bap-ssn-dx')+' / '+get('bap-ssn-sx')+' cm');y+=3;
     y=addSection(doc,y,'Scelta Protesi',BLU);
     y=addText(doc,y,'Note ordine protesi',get('prot-note'));y+=3;
@@ -1591,5 +1740,324 @@ function eseguiFirma(){
 
 </script>
 
+<script>
+
+
+// ── STORICO PAZIENTI ──────────────────────────────────────────────────────────
+var storicoFilter='tutti';
+
+function getAllSchede(){
+  var schede=[];
+  for(var i=0;i<localStorage.length;i++){
+    var key=localStorage.key(i);
+    if(!key||(!key.startsWith('sc_est_')&&!key.startsWith('sc_chir_')))continue;
+    try{
+      var data=JSON.parse(localStorage.getItem(key));
+      if(!data)continue;
+      var tipo=key.startsWith('sc_est_')?'est':'chir';
+      var cognome=(data['e-cognome']||data['c-cognome']||'').trim();
+      var nome=(data['e-nome']||data['c-nome']||'').trim();
+      if(!cognome&&!nome)continue; // skip empty
+      schede.push({
+        key:key,
+        tipo:tipo,
+        cognome:cognome,
+        nome:nome,
+        nomeCompleto:(cognome+' '+nome).trim(),
+        dob:data['e-dob']||data['c-dob']||'',
+        area:data['e-area']||'',
+        diagnosi:data['e-diagnosi']||'',
+        trattamento:data['e-tratt']||'',
+        intervento:data['op-intervento']||'',
+        prodotto:data['e-prod']||'',
+        consenso:data['consensoKey']||data['c-cons-procedura']||'',
+        ts:data.ts||'',
+        dataTratt:data['e-data-tratt']||data['op-data']||'',
+        note:data['e-note']||data['op-note']||'',
+        raw:data
+      });
+    }catch(e){}
+  }
+  // Sort by timestamp desc
+  schede.sort(function(a,b){return (b.ts||'').localeCompare(a.ts||'');});
+  return schede;
+}
+
+function highlight(text, query){
+  if(!query||!text)return text||'';
+  var re=new RegExp('('+query.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi');
+  return String(text).replace(re,'<span class="scheda-card-highlight">$1</span>');
+}
+
+function cercaSchede(q){
+  var query=(q||'').trim().toLowerCase();
+  var schede=getAllSchede();
+  var filtered=schede.filter(function(s){
+    if(storicoFilter==='est'&&s.tipo!=='est')return false;
+    if(storicoFilter==='chir'&&s.tipo!=='chir')return false;
+    if(!query)return true;
+    var searchable=[s.nomeCompleto,s.area,s.diagnosi,s.trattamento,s.intervento,s.prodotto,s.consenso,s.note].join(' ').toLowerCase();
+    return searchable.indexOf(query)>=0;
+  });
+  renderSchede(filtered, query);
+}
+
+function renderSchede(schede, query){
+  var lista=document.getElementById('storico-lista');
+  var stats=document.getElementById('storico-stats');
+  stats.textContent=schede.length+' scheda'+(schede.length!==1?'e':'')+' trovata'+(schede.length!==1?'e':'');
+  if(schede.length===0){
+    lista.innerHTML='<div style="text-align:center;padding:40px 20px;color:#8E8E93;font-size:14px;font-weight:400;">Nessuna scheda trovata</div>';
+    return;
+  }
+  lista.innerHTML=schede.map(function(s){
+    var badge=s.tipo==='est'?'<span class="scheda-card-badge badge-est">Medicina Estetica</span>':'<span class="scheda-card-badge badge-chir">Chirurgia</span>';
+    var infoLines=[];
+    if(s.area)infoLines.push(highlight(s.area,query));
+    if(s.diagnosi)infoLines.push(highlight(s.diagnosi.substring(0,80)+(s.diagnosi.length>80?'…':''),query));
+    if(s.trattamento)infoLines.push(highlight(s.trattamento.substring(0,80)+(s.trattamento.length>80?'…':''),query));
+    if(s.intervento)infoLines.push(highlight(s.intervento,query));
+    if(s.prodotto)infoLines.push(highlight(s.prodotto,query));
+    var dataStr=s.dataTratt?'Trattamento: '+s.dataTratt:'';
+    var savedStr=s.ts?new Date(s.ts).toLocaleDateString('it-IT'):'';
+    return '<div class="scheda-card" onclick="apriScheda(\''+s.key+'\',\''+s.tipo+'\')">'
+      +'<div class="scheda-card-header">'
+      +'<div class="scheda-card-name">'+highlight(s.nomeCompleto,query)+'</div>'
+      +badge
+      +'</div>'
+      +(infoLines.length?'<div class="scheda-card-info">'+infoLines.join(' · ')+'</div>':'')
+      +'<div class="scheda-card-meta">'+(dataStr?dataStr+'  ·  ':'')+(savedStr?'Salvato: '+savedStr:'')+'</div>'
+      +'</div>';
+  }).join('');
+}
+
+function setFilter(f){
+  storicoFilter=f;
+  document.querySelectorAll('.filter-pill').forEach(function(p){p.classList.remove('active');});
+  event.target.classList.add('active');
+  cercaSchede(document.getElementById('storico-search').value);
+}
+
+function aggiornaStorico(){
+  document.getElementById('storico-search').value='';
+  cercaSchede('');
+}
+
+function apriScheda(key, tipo){
+  var data=JSON.parse(localStorage.getItem(key)||'{}');
+  if(!data)return;
+  if(tipo==='est'){
+    schedaIdEst=data.id||key.replace('sc_','');
+    openSection('est');
+    loadEst(data.id||key.replace('sc_est_','est_'));
+  } else {
+    schedaIdChir=data.id||key.replace('sc_','');
+    openSection('chir');
+    setTimeout(function(){
+      openIntervento('mammella');
+      loadChir(data.id||key.replace('sc_chir_','chir_'));
+    },100);
+  }
+}
+
+// ── STAMPA DOCUMENTI ──────────────────────────────────────────────────────────
+var CONSENSI_CHIR = {
+  'mastopessi-additiva': {
+    titolo: 'Mastopessi e Mastoplastica Additiva',
+    sottotitolo: 'Sollevamento del seno cadente e aumento del volume mediante protesi mammarie',
+    testo: "Il/La sottoscritto/a dichiara di aver ricevuto dal Dr. Simone Caccetta tutte le informazioni necessarie per prendere una decisione consapevole in merito all'intervento di Mastopessi e Mastoplastica Additiva.\n\nINFORMAZIONI SULL'INTERVENTO\n\nL'intervento corregge la discesa della mammella e incrementa il volume mediante protesi. L'incisione può essere periareolare, al solco sottomammario o ascellare. La tasca protesica può essere sottoghiandolare o sottomuscolare/dual plane.\n\nALTERNATIVE TERAPEUTICHE\n\nLipofilling (autotrapianto di grasso): incremento di volume modesto, riassorbimento 30-50%.\n\nCOMPLICANZE\n\nInfezione: può richiedere rimozione temporanea della protesi.\nEmatoma: può richiedere revisione chirurgica in sala.\nNecrosi cutanea areolare: infrequente, più rischiosa nelle ptosi severe.\nDeiscenza della ferita.\nContrattura capsulare (3-8%): indurimento, deformazione, dolenzia. Può richiedere revisione.\nRippling: pieghe visibili, più frequenti con pinch sottile e tasca sottoghiandolare.\nPtosi secondaria: recidiva possibile, soprattutto con smagliature.\nDislocazione dell'impianto.\nRottura della protesi: controllare con ecografia annuale, necessita sostituzione.\nRiduzione sensibilità del capezzolo: transitoria, raramente permanente.\nDeformità dinamica (tasca retromuscolare).\nBIA-ALCL: rarissima (3 casi/100.000 in Italia), associata a protesi testurizzate. Trattabile con rimozione di protesi e capsula.\n\nDICHIARAZIONI DEL PAZIENTE\n\n1. L'intervento non è definitivo: le protesi hanno durata limitata.\n2. I risultati sono prevedibili solo statisticamente.\n3. Il risultato estetico è apprezzabile pienamente dopo circa 6 mesi.\n4. I due lati del corpo non sono mai perfettamente simmetrici.\n5. Non ho assunto antiaggreganti o FANS da almeno 10 giorni.\n6. Ho interrotto il fumo da 7 giorni e non fumerò per 15 giorni dopo.\n7. Non sono in stato di gravidanza.\n8. Acconsento all'anestesia generale e ai suoi rischi.\n9. Non è garantibile il futuro allattamento.\n10. Le protesi non precludono la mammografia ma ne rendono l'interpretazione più difficile.\n11. Eventuali ritocchi o procedure secondarie sono a carico della paziente.",
+    punti: [
+      {id:'ct', testo:"Acconsento all'intervento di Mastopessi e/o Mastoplastica Additiva"},
+      {id:'cf', testo:"Acconsento all'archiviazione di fotografie cliniche pre e post-operatorie"},
+      {id:'cs', testo:"Acconsento all'utilizzo delle fotografie per scopi didattico-scientifici con garanzia di anonimato (facoltativo)"},
+      {id:'cp', testo:"Acconsento al trattamento dei dati personali (GDPR Reg. UE 2016/679)"}
+    ]
+  }
+};
+
+var SKINCARE_TESTO = "PRODOTTI PER LA CURA DEL VISO\nDr. Simone Caccetta — Chirurgia Plastica, Ricostruttiva ed Estetica\n\nMATTINA\n\nA.G.E. Reverse Day\nCrema giorno rimodellante con carnosina (anti-glicazione), Exo-P (anti-inquinamento) e acido ialuronico reticolato: ridefinisce il contorno del viso e migliora tonicita ed elasticita.\nVa sempre seguita da fotoprotezione.\n\nFotoprotector Fusion Water SPF50+\nFotoprotezione viso ultraleggera in fase acquosa, idrata con acido ialuronico e protegge con vitamina E ed estratto di alga mediterranea.\nIn estate riapplicare ogni 2 ore in caso di esposizione diretta al sole.\n\nSERA\n\nA.G.E. Reverse Night\nCrema notte con melatonina (azione antiossidante riparatrice) e carnosina (anti-glicazione): aiuta a ridurre rughe e perdita di tono accumulate durante il giorno.\nDa usare tutte le sere fino a settembre, in attesa di introdurre il retinoide.\n\nRetinal Smooth (da ottobre)\nVa introdotto a partire da ottobre, quando la radiazione UV diminuisce. I retinoidi accelerano il rinnovamento cellulare, rendendo la pelle piu sottile e sensibile al sole.\nSiero bifasico notte con retinaldeide, matrichine e melatonina: accelera il rinnovamento cutaneo, riduce le rughe, dona luminosita.\nAttenzione: introdurre gradualmente (2 sere/settimana per le prime 2 settimane, poi aumentare se ben tollerato). Puo dare rossore o desquamazione transitoria. Non va mai usato di giorno. E indispensabile la fotoprotezione al mattino successivo.\nDa ottobre, alternarlo con l'A.G.E. Reverse Night (2-3 sere/settimana ciascuno).\n\nDOVE ORDINARE\nI prodotti sono disponibili su: https://www.efarma.com/isdin.html";
+
+function stampaSkincare(){
+  if(typeof window.jspdf==='undefined'&&typeof jsPDF==='undefined'){showToast('Libreria PDF non disponibile');return;}
+  var jsPDFClass=window.jspdf?window.jspdf.jsPDF:jsPDF;
+  var doc=new jsPDFClass({orientation:'portrait',unit:'mm',format:'a4'});
+  var W=210,ml=16,cw=178,y=0;
+  var SAGE=[142,158,154],DARK=[28,28,30],GREY=[100,100,100];
+
+  // Header
+  doc.setFillColor(190,198,195);doc.rect(0,0,W,22,'F');
+  doc.setTextColor(28,28,30);doc.setFont('helvetica','bold');doc.setFontSize(13);
+  doc.text('Dr. Simone Caccetta',ml,10);
+  doc.setFontSize(8);doc.setFont('helvetica','normal');
+  doc.text('Chirurgia Plastica, Ricostruttiva ed Estetica',ml,16);
+  doc.setFontSize(9);doc.setFont('helvetica','bold');
+  doc.text('PRODOTTI PER LA CURA DEL VISO',W-ml,10,{align:'right'});
+  doc.text(new Date().toLocaleDateString('it-IT'),W-ml,16,{align:'right'});
+  y=28;
+
+  // ISDIN note
+  doc.setFillColor(238,241,240);doc.roundedRect(ml,y,cw,8,2,2,'F');
+  doc.setTextColor(GREY[0],GREY[1],GREY[2]);doc.setFont('helvetica','italic');doc.setFontSize(8);
+  doc.text('Linea ISDIN Isdinceutics — disponibile su efarma.com/isdin.html',W/2,y+5.5,{align:'center'});
+  y+=12;
+
+  function secTitle(t){
+    doc.setFillColor(SAGE[0],SAGE[1],SAGE[2]);doc.roundedRect(ml,y,cw,9,2,2,'F');
+    doc.setTextColor(28,28,30);doc.setFont('helvetica','bold');doc.setFontSize(10);
+    doc.text(t,ml+5,y+6.2);y+=13;
+  }
+  function prodTitle(t){
+    doc.setTextColor(28,28,30);doc.setFont('helvetica','bold');doc.setFontSize(10);
+    doc.text(t,ml,y);y+=6;
+  }
+  function prodText(t){
+    doc.setTextColor(GREY[0],GREY[1],GREY[2]);doc.setFont('helvetica','normal');doc.setFontSize(8.5);
+    var lines=doc.splitTextToSize(t,cw);
+    doc.text(lines,ml,y);y+=lines.length*4.5+3;
+  }
+  function prodUrl(t){
+    doc.setTextColor(100,130,170);doc.setFont('helvetica','normal');doc.setFontSize(7.5);
+    doc.text(t,ml,y);y+=6;
+  }
+
+  secTitle('MATTINA');
+  prodTitle('A.G.E. Reverse Day');
+  prodText('Crema giorno rimodellante con carnosina (anti-glicazione), Exo-P (anti-inquinamento) e acido ialuronico reticolato: ridefinisce il contorno del viso e migliora tonicita ed elasticita. Va sempre seguita da fotoprotezione.');
+  prodUrl('isdin.com/it/isdinceutics/age-reverse-trattamento-rimodellante-antiaging');
+  y+=2;
+  prodTitle('Fotoprotector Fusion Water SPF50+');
+  prodText('Fotoprotezione viso ultraleggera in fase acquosa, idrata con acido ialuronico e protegge con vitamina E ed estratto di alga mediterranea. In estate riapplicare ogni 2 ore in caso di esposizione diretta al sole.');
+  prodUrl('isdin.com/it/prodotto/fotoprotector-isdin/magic-spf-50');
+  y+=6;
+
+  secTitle('SERA');
+  prodTitle('A.G.E. Reverse Night');
+  prodText('Crema notte con melatonina (azione antiossidante riparatrice) e carnosina (anti-glicazione): aiuta a ridurre rughe e perdita di tono accumulate durante il giorno. Da usare tutte le sere fino a settembre, in attesa di introdurre il retinoide.');
+  prodUrl('isdin.com/it/prodotto/isdinceutics/age-reverse-night');
+  y+=2;
+  prodTitle('Retinal Smooth — da introdurre a ottobre');
+  prodText('Va introdotto a partire da ottobre, quando la radiazione UV diminuisce. I retinoidi accelerano il rinnovamento cellulare, rendendo la pelle temporaneamente piu sottile e piu sensibile al sole.\nSiero bifasico notte con retinaldeide, matrichine e melatonina: accelera il rinnovamento cutaneo, riduce le rughe, dona luminosita.');
+  y+=2;
+  doc.setFillColor(253,236,234);doc.roundedRect(ml,y,cw,28,2,2,'F');
+  doc.setTextColor(150,50,40);doc.setFont('helvetica','bold');doc.setFontSize(8.5);
+  doc.text('ATTENZIONE:',ml+3,y+6);
+  doc.setFont('helvetica','normal');doc.setTextColor(80,40,35);
+  var warn=doc.splitTextToSize('Introdurre gradualmente (2 sere/settimana per le prime 2 settimane, poi aumentare se ben tollerato). Puo dare rossore o desquamazione transitoria nelle prime settimane. Non va MAI usato di giorno. E indispensabile la fotoprotezione al mattino successivo. Da ottobre, alternarlo con A.G.E. Reverse Night (2-3 sere/settimana ciascuno).',cw-8);
+  doc.text(warn,ml+3,y+12);
+  y+=32;
+  prodUrl('isdin.com/it/prodotto/isdinceutics/retinal-smooth');
+
+  // Footer
+  doc.setDrawColor(190,198,195);doc.setLineWidth(0.5);doc.line(ml,284,W-ml,284);
+  doc.setFont('helvetica','normal');doc.setFontSize(7);doc.setTextColor(150,150,150);
+  doc.text('Dr. Simone Caccetta — Chirurgia Plastica, Ricostruttiva ed Estetica',ml,288);
+  doc.text(new Date().toLocaleDateString('it-IT'),W-ml,288,{align:'right'});
+
+  doc.save('Skincare_Viso_ISDIN.pdf');
+  showToast('PDF skincare salvato!');
+}
+
+function stampaConsenso(key){
+  if(typeof window.jspdf==='undefined'&&typeof jsPDF==='undefined'){showToast('Libreria PDF non disponibile');return;}
+  var jsPDFClass=window.jspdf?window.jspdf.jsPDF:jsPDF;
+
+  // Get consent from either estetica or chirurgia object
+  var cons = (typeof CONSENSI !== 'undefined' && CONSENSI[key]) ? CONSENSI[key] :
+             (CONSENSI_CHIR[key] ? CONSENSI_CHIR[key] : null);
+  if(!cons){showToast('Consenso non trovato');return;}
+
+  var doc=new jsPDFClass({orientation:'portrait',unit:'mm',format:'a4'});
+  var W=210,ml=14,cw=182,y=0;
+  var SAGE=[190,198,195],DARK=[28,28,30],GREY=[100,100,100];
+
+  // Header
+  doc.setFillColor(SAGE[0],SAGE[1],SAGE[2]);doc.rect(0,0,W,20,'F');
+  doc.setTextColor(DARK[0],DARK[1],DARK[2]);doc.setFont('helvetica','bold');doc.setFontSize(12);
+  doc.text('Dr. Simone Caccetta',ml,9);
+  doc.setFontSize(7.5);doc.setFont('helvetica','normal');
+  doc.text('Chirurgia Plastica, Ricostruttiva ed Estetica  |  Medicina Estetica',ml,15);
+  doc.setFontSize(8);doc.setFont('helvetica','bold');
+  doc.text('MODELLO INFORMATIVO E DI CONSENSO',W-ml,9,{align:'right'});
+  doc.text(new Date().toLocaleDateString('it-IT'),W-ml,15,{align:'right'});
+  y=26;
+
+  // Title
+  doc.setTextColor(DARK[0],DARK[1],DARK[2]);doc.setFont('helvetica','bold');doc.setFontSize(14);
+  doc.text(cons.titolo,W/2,y,{align:'center'});y+=7;
+  doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(GREY[0],GREY[1],GREY[2]);
+  doc.text(cons.sottotitolo,W/2,y,{align:'center'});y+=10;
+
+  // Intro line
+  doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(DARK[0],DARK[1],DARK[2]);
+  var intro='Io, sottoscritt_ _________________________ _________________________ ho gia ricevuto tutte le informazioni utili per prendere una decisione consapevole.';
+  var ilines=doc.splitTextToSize(intro,cw);
+  doc.text(ilines,ml,y);y+=ilines.length*4.5+6;
+
+  // Body text
+  doc.setFontSize(8.5);doc.setFont('helvetica','normal');doc.setTextColor(DARK[0],DARK[1],DARK[2]);
+  var tlines=doc.splitTextToSize(cons.testo,cw);
+  var bh=tlines.length*4+6;
+  if(y+bh>272){doc.addPage();y=14;}
+  doc.setFillColor(238,241,240);doc.roundedRect(ml,y,cw,bh,2,2,'F');
+  doc.text(tlines,ml+4,y+5);y+=bh+10;
+
+  // Dichiarazioni
+  if(cons.punti){
+    if(y+12>272){doc.addPage();y=14;}
+    doc.setFillColor(SAGE[0],SAGE[1],SAGE[2]);doc.roundedRect(ml,y,cw,8,1.5,1.5,'F');
+    doc.setFont('helvetica','bold');doc.setFontSize(8.5);doc.setTextColor(DARK[0],DARK[1],DARK[2]);
+    doc.text('DICHIARAZIONI E CONSENSO',ml+4,y+5.5);y+=11;
+    cons.punti.forEach(function(p){
+      if(y+9>272){doc.addPage();y=14;}
+      doc.setFillColor(248,249,248);doc.roundedRect(ml,y,cw,8,1.5,1.5,'F');
+      doc.setFont('helvetica','normal');doc.setFontSize(8);doc.setTextColor(DARK[0],DARK[1],DARK[2]);
+      doc.text(p.testo,ml+3,y+5,{maxWidth:cw-25});
+      // NON ACCONSENTO / ACCONSENTO boxes
+      doc.setDrawColor(150,150,150);doc.setLineWidth(0.3);
+      doc.rect(W-ml-50,y+1.5,22,5);doc.rect(W-ml-24,y+1.5,22,5);
+      doc.setFontSize(6.5);doc.setTextColor(GREY[0],GREY[1],GREY[2]);
+      doc.text('NON ACCONSENTO',W-ml-49,y+5.2);
+      doc.text('SI, ACCONSENTO',W-ml-23,y+5.2);
+      y+=10;
+    });
+  }
+
+  // Firma
+  if(y+55>272){doc.addPage();y=14;}
+  y+=8;
+  doc.setFillColor(SAGE[0],SAGE[1],SAGE[2]);doc.roundedRect(ml,y,cw,8,1.5,1.5,'F');
+  doc.setFont('helvetica','bold');doc.setFontSize(8.5);doc.setTextColor(DARK[0],DARK[1],DARK[2]);
+  doc.text('FIRME',ml+4,y+5.5);y+=11;
+  var fw=(cw-6)/2;
+  doc.setDrawColor(180,185,183);doc.setLineWidth(0.3);
+  doc.roundedRect(ml,y,fw,36,2,2,'S');
+  doc.roundedRect(ml+fw+6,y,fw,36,2,2,'S');
+  doc.setFont('helvetica','bold');doc.setFontSize(8);doc.setTextColor(GREY[0],GREY[1],GREY[2]);
+  doc.text('PAZIENTE',ml+3,y+6);doc.text('DR. SIMONE CACCETTA',ml+fw+9,y+6);
+  doc.setFont('helvetica','normal');doc.setFontSize(8);doc.setTextColor(DARK[0],DARK[1],DARK[2]);
+  doc.text('Data: ___________________',ml+3,y+13);doc.text('Data: ___________________',ml+fw+9,y+13);
+
+  // Footer
+  var np=doc.internal.getNumberOfPages();
+  for(var i=1;i<=np;i++){
+    doc.setPage(i);doc.setDrawColor(190,198,195);doc.setLineWidth(0.4);doc.line(ml,284,W-ml,284);
+    doc.setFont('helvetica','normal');doc.setFontSize(7);doc.setTextColor(150,150,150);
+    doc.text('Dr. Simone Caccetta — Documento medico riservato — GDPR Reg. UE 2016/679',ml,288);
+    doc.text('Pag. '+i+'/'+np,W-ml,288,{align:'right'});
+  }
+
+  var filename='Consenso_'+key.replace(/-/g,'_')+'_'+new Date().toISOString().split('T')[0]+'.pdf';
+  doc.save(filename);
+  showToast('PDF salvato!');
+}
+
+if('serviceWorker' in navigator){
+  window.addEventListener('load', function(){
+    navigator.serviceWorker.register('/scheda-estetica/sw.js')
+      .then(function(reg){ console.log('SW registered'); })
+      .catch(function(err){ console.log('SW error:', err); });
+  });
+}
+</script>
 </body>
 </html>
