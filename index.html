@@ -1928,7 +1928,6 @@ function renderSchede(schede, query){
   var lista=document.getElementById('storico-lista');
   var stats=document.getElementById('storico-stats');
 
-  // Raggruppa per paziente
   var pazienti={};
   schede.forEach(function(s){
     var k=s.nomeCompleto||'Paziente senza nome';
@@ -1936,26 +1935,37 @@ function renderSchede(schede, query){
     pazienti[k].schede.push(s);
     if(s.ts>pazienti[k].ultimaData)pazienti[k].ultimaData=s.ts;
   });
-  var nomi=Object.keys(pazienti).sort(function(a,b){return (pazienti[b].ultimaData||'').localeCompare(pazienti[a].ultimaData||'');});
-  stats.textContent=nomi.length+' pazient'+(nomi.length===1?'e':'i')+' · '+schede.length+' schede';
+  var nomi=Object.keys(pazienti).sort(function(a,b){
+    return (pazienti[b].ultimaData||'').localeCompare(pazienti[a].ultimaData||'');
+  });
+  stats.textContent=nomi.length+' pazient'+(nomi.length===1?'e':'i')+' - '+schede.length+' schede';
   if(!nomi.length){
-    lista.innerHTML='<div style="text-align:center;padding:40px 20px;color:#8E8E93;font-size:14px;font-weight:400;">Nessuna scheda trovata</div>';
+    lista.innerHTML='<div style="text-align:center;padding:40px 20px;color:#8E8E93;font-size:14px;">Nessuna scheda trovata</div>';
     return;
   }
-  lista.innerHTML=nomi.map(function(nome){
+  var html='';
+  nomi.forEach(function(nome){
     var p=pazienti[nome];
-    var tipi=[...new Set(p.schede.map(function(s){return s.tipo;}))];
-    var badges=tipi.map(function(t){return t==='est'?'<span class="scheda-card-badge badge-est">Estetica</span>':'<span class="scheda-card-badge badge-chir">Chirurgia</span>';}).join(' ');
+    var tipi=[];
+    p.schede.forEach(function(s){ if(tipi.indexOf(s.tipo)<0)tipi.push(s.tipo); });
+    var badges='';
+    tipi.forEach(function(t){
+      badges+=t==='est'?'<span class="scheda-card-badge badge-est">Estetica</span>':'<span class="scheda-card-badge badge-chir">Chirurgia</span>';
+    });
     var ultima=p.ultimaData?new Date(p.ultimaData).toLocaleDateString('it-IT'):'';
-    return '<div class="scheda-card" onclick="apriProfilo(\'+encodeURIComponent(nome)+\'\')" style="cursor:pointer;">'
-      +'<div class="scheda-card-header">'
-      +'<div class="scheda-card-name">'+highlight(nome,query)+'</div>'
-      +'<div>'+badges+'</div>'
-      +'</div>'
-      +'<div class="scheda-card-info">'+p.schede.length+' scheda'+(p.schede.length===1?'':'e')+' archiviata'+(p.schede.length===1?'':'e')+'</div>'
-      +'<div class="scheda-card-meta">'+(ultima?'Ultima visita: '+ultima:'')+'</div>'
-      +'</div>';
-  }).join('');
+    var nomeEnc=encodeURIComponent(nome);
+    var nomeHL=highlight(nome,query);
+    var nSchede=p.schede.length;
+    html+='<div class="scheda-card" style="cursor:pointer;" onclick="apriProfilo(decodeURIComponent(this.dataset.nome))" data-nome="'+nomeEnc+'">';
+    html+='<div class="scheda-card-header">';
+    html+='<div class="scheda-card-name">'+nomeHL+'</div>';
+    html+='<div>'+badges+'</div>';
+    html+='</div>';
+    html+='<div class="scheda-card-info">'+nSchede+' scheda'+(nSchede===1?'':'e')+' archiviata'+(nSchede===1?'':'e')+'</div>';
+    html+='<div class="scheda-card-meta">'+(ultima?'Ultima visita: '+ultima:'')+'</div>';
+    html+='</div>';
+  });
+  lista.innerHTML=html;
 }
 
 function setFilter(f){
@@ -1995,12 +2005,12 @@ function apriProfilo(nomeEnc){
       var data=s.dataTratt||'';
       var saved=s.ts?new Date(s.ts).toLocaleDateString('it-IT'):'';
       return '<div class="scheda-card">'
-        +'<div onclick="apriScheda(''+s.key+'',''+s.tipo+'')" style="cursor:pointer;">'
+        +'<div onclick="apriScheda(\''+s.key+'\',\''+s.tipo+'\')" style="cursor:pointer;">'
         +'<div class="scheda-card-header"><div class="scheda-card-name" style="font-size:14px;">'+(data||saved)+'</div>'+badge+'</div>'
         +(info.length?'<div class="scheda-card-info">'+info.join(' · ')+'</div>':'')
         +'<div class="scheda-card-meta">'+(saved?'Salvato: '+saved:'')+'</div>'
         +'</div>'
-        +'<button onclick="eliminaScheda(''+s.key+'')" style="margin-top:8px;width:100%;height:34px;border-radius:8px;border:0.5px solid rgba(192,57,43,.2);background:rgba(192,57,43,.06);color:#C0392B;font-family:inherit;font-weight:700;font-size:12px;cursor:pointer;">Elimina</button>'
+        +'<button onclick="eliminaScheda(\''+s.key+'\')" style="margin-top:8px;width:100%;height:34px;border-radius:8px;border:0.5px solid rgba(192,57,43,.2);background:rgba(192,57,43,.06);color:#C0392B;font-family:inherit;font-weight:700;font-size:12px;cursor:pointer;">Elimina</button>'
         +'</div>';
     }).join('');
   }
