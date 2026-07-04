@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v9 -->
+<!-- v10 -->
 <html lang="it">
 <head>
 <meta charset="UTF-8">
@@ -1093,8 +1093,12 @@ function restoreYn(data){
 function switchTabEst(i){
   currentTabEst=i;
   document.querySelectorAll('.tab-est').forEach(function(t,j){t.classList.toggle('active',i===j);});
-  document.querySelectorAll('#app-est .page').forEach(function(p,j){p.style.display=(i===j)?'block':'none';});
-  if(i===3)setTimeout(initAllFirme,50);
+  var pages=['est-tab0','est-tab1','est-tab2','est-tab-foto','est-tab3'];
+  pages.forEach(function(id,j){
+    var el=document.getElementById(id);
+    if(el)el.style.display=(i===j)?'block':'none';
+  });
+  if(i===4)setTimeout(initAllFirme,50);
 }
 function switchTabChir(i){
   currentTabChir=i;
@@ -1110,7 +1114,9 @@ function switchTabChirA(i){
   document.querySelectorAll('.tab-chir-a').forEach(function(t,j){t.classList.toggle('active',i===j);});
   document.querySelectorAll('#chir-altro .page').forEach(function(p,j){p.style.display=(i===j)?'block':'none';});
 }
-document.querySelectorAll('#app-est .page').forEach(function(p,j){p.style.display=j===0?'block':'none';});
+['est-tab0','est-tab1','est-tab2','est-tab-foto','est-tab3'].forEach(function(id,j){
+  var el=document.getElementById(id);if(el)el.style.display=j===0?'block':'none';
+});
 document.querySelectorAll('#chir-mammella .page').forEach(function(p,j){p.style.display=j===0?'block':'none';});
 document.querySelectorAll('#chir-altro .page').forEach(function(p,j){p.style.display=j===0?'block':'none';});
 
@@ -1862,11 +1868,15 @@ function getAllSchede(){
   var schede=[];
   for(var i=0;i<localStorage.length;i++){
     var key=localStorage.key(i);
-    if(!key||(!key.startsWith('sc_est_')&&!key.startsWith('sc_chir_')))continue;
+    if(!key)continue;
+    // Accept both old and new key formats
+    var isEst=key.startsWith('sc_est_')||key.startsWith('est_');
+    var isChir=key.startsWith('sc_chir_')||key.startsWith('chir_');
+    if(!isEst&&!isChir)continue;
     try{
       var data=JSON.parse(localStorage.getItem(key));
       if(!data)continue;
-      var tipo=key.startsWith('sc_est_')?'est':'chir';
+      var tipo=(key.startsWith('sc_est_')||key.startsWith('est_'))?'est':'chir';
       var cognome=(data['e-cognome']||data['c-cognome']||'').trim();
       var nome=(data['e-nome']||data['c-nome']||'').trim();
       if(!cognome&&!nome)continue; // skip empty
@@ -2407,10 +2417,10 @@ async function salvaEst() {
   if(sbIdEst) await uploadPendingFotos(sbIdEst, 'est');
   
   // Generate and download PDF
-  salvaPDFEst();
+  try{salvaPDFEst();}catch(e){showToast('Scheda salvata, errore PDF: '+e.message);}
   
-  document.getElementById('dot-est').style.background='#30D158';
-  document.getElementById('saved-est').textContent='Salvato alle '+new Date().getHours()+':'+String(new Date().getMinutes()).padStart(2,'0');
+  var el=document.getElementById('dot-est');if(el)el.style.background='#30D158';
+  var se=document.getElementById('saved-est');if(se)se.textContent='Salvato alle '+new Date().getHours()+':'+String(new Date().getMinutes()).padStart(2,'0');
   showToast('Scheda salvata!');
 }
 
@@ -2443,10 +2453,10 @@ async function salvaChir() {
   if(sbIdChir) await uploadPendingFotos(sbIdChir, 'chir');
   
   // Generate and download PDF
-  salvaPDFChir();
+  try{salvaPDFChir();}catch(e){showToast('Scheda salvata, errore PDF: '+e.message);}
   
-  document.getElementById('dot-chir').style.background='#30D158';
-  document.getElementById('saved-chir').textContent='Salvato alle '+new Date().getHours()+':'+String(new Date().getMinutes()).padStart(2,'0');
+  var elc=document.getElementById('dot-chir');if(elc)elc.style.background='#30D158';
+  var sc=document.getElementById('saved-chir');if(sc)sc.textContent='Salvato alle '+new Date().getHours()+':'+String(new Date().getMinutes()).padStart(2,'0');
   showToast('Scheda salvata!');
 }
 
