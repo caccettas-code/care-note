@@ -1,4 +1,4 @@
-const CACHE_NAME = 'schede-cliniche-v7';
+const CACHE_NAME = 'schede-cliniche-v8';
 const ASSETS = [
   '/care-note/',
   '/care-note/index.html',

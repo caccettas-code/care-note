@@ -28,23 +28,25 @@ body{font-family:var(--fnt);font-weight:700;background:#BEC6C3;min-height:100vh;
 input,textarea,button,select{font-family:var(--fnt);font-weight:700;}
 
 /* ── HOME ── */
-.home{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:32px 24px;background:#BEC6C3;}
+.home{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:32px 22px;background:#BEC6C3;}
 .home-logo{font-size:22px;font-weight:700;color:#1C1C1E;margin-bottom:4px;letter-spacing:-.3px;}
 .logo-box{border:3px solid #1C1C1E;padding:28px 46px;text-align:center;font-family:"Poppins",sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:2px;line-height:1.6;font-size:38px;color:#1C1C1E;margin-bottom:24px;background:transparent;}
 .brand-mark{position:fixed;top:calc(14px + env(safe-area-inset-top));left:18px;font-family:"Poppins",sans-serif;font-weight:700;font-size:13px;letter-spacing:0.5px;color:#1C1C1E;opacity:.6;z-index:40;}
-.home-sub{font-size:14px;color:var(--txt3);font-weight:400;margin-bottom:48px;text-align:center;}
-.home-cards{display:flex;flex-direction:column;gap:16px;width:100%;max-width:400px;}
-.home-card{border-radius:18px;padding:28px 24px;cursor:pointer;display:flex;align-items:center;gap:20px;box-shadow:0 2px 12px rgba(0,0,0,.08);transition:transform .1s;}
+.home-sub{font-size:13.5px;color:rgba(28,28,30,.55);font-weight:500;margin-bottom:36px;text-align:center;letter-spacing:.1px;}
+.home-cards{display:flex;flex-direction:column;gap:12px;width:100%;max-width:400px;}
+.home-card{border-radius:20px;padding:14px 16px;cursor:pointer;display:flex;align-items:center;gap:14px;background:rgba(255,255,255,.55);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border:0.5px solid rgba(255,255,255,.5);box-shadow:0 1px 2px rgba(0,0,0,.04),0 8px 22px rgba(28,28,30,.07);transition:transform .12s ease;}
 .home-card:active{transform:scale(.97);}
-.home-card-est{background:rgba(142,158,154,.55);backdrop-filter:blur(12px);border:1px solid rgba(142,158,154,.35);}
-.home-card-chir{background:rgba(110,132,128,.55);backdrop-filter:blur(12px);border:1px solid rgba(110,132,128,.35);}
-.home-card-docs{background:rgba(160,155,145,.45);backdrop-filter:blur(12px);border:1px solid rgba(150,145,135,.35);}
-.home-card-storico{background:rgba(130,140,148,.45);backdrop-filter:blur(12px);border:1px solid rgba(120,130,138,.35);}
-.home-card-app{background:rgba(196,164,132,.5);backdrop-filter:blur(12px);border:1px solid rgba(186,154,122,.35);}
-.home-card-icon{font-size:36px;flex-shrink:0;}
-.home-card-text{}
-.home-card-title{font-size:18px;font-weight:700;color:#1C1C1E;margin-bottom:4px;}
-.home-card-desc{font-size:13px;color:rgba(0,0,0,.55);font-weight:400;line-height:1.4;}
+.home-card-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:inset 0 1px 1px rgba(255,255,255,.3);}
+.home-card-icon svg{width:22px;height:22px;stroke:#fff;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
+.home-card-est .home-card-icon{background:linear-gradient(160deg,#9CADA8,#7E9490);}
+.home-card-chir .home-card-icon{background:linear-gradient(160deg,#7B9591,#5E7773);}
+.home-card-docs .home-card-icon{background:linear-gradient(160deg,#B0A99C,#958E80);}
+.home-card-storico .home-card-icon{background:linear-gradient(160deg,#93A0A8,#70828C);}
+.home-card-app .home-card-icon{background:linear-gradient(160deg,#D2AE87,#B78E68);}
+.home-card-text{flex:1;min-width:0;}
+.home-card-title{font-size:16px;font-weight:700;color:#1C1C1E;margin-bottom:2px;letter-spacing:-.1px;}
+.home-card-desc{font-size:12.5px;color:rgba(28,28,30,.5);font-weight:500;line-height:1.35;}
+.home-card-chevron{font-size:19px;color:rgba(28,28,30,.22);font-weight:700;flex-shrink:0;}
 
 /* ── HEADER ── */
 .hdr{padding:20px 20px 18px;position:sticky;top:0;z-index:100;}
@@ -193,34 +195,44 @@ input,textarea,button,select{font-family:var(--fnt);font-weight:700;}
   <div class="home-sub">Chirurgia Plastica, Ricostruttiva ed Estetica</div>
   <div class="home-cards">
     <div class="home-card home-card-est" onclick="openSection('est')">
+      <div class="home-card-icon"><svg viewBox="0 0 24 24"><path d="M12 3v5M9 8h6l1.5 4.5a5 5 0 11-9 0L9 8z"/><circle cx="12" cy="17" r="1" fill="#fff" stroke="none"/></svg></div>
       <div class="home-card-text">
         <div class="home-card-title">Medicina Estetica</div>
         <div class="home-card-desc">Filler, tossina botulinica, biostimolazione, peeling</div>
       </div>
+      <div class="home-card-chevron">›</div>
     </div>
     <div class="home-card home-card-chir" onclick="openSection('chir')">
+      <div class="home-card-icon"><svg viewBox="0 0 24 24"><path d="M4 20L14 10M15 3l6 6-3 3-6-6zM10 14l2 2"/><circle cx="6" cy="18" r="2"/></svg></div>
       <div class="home-card-text">
         <div class="home-card-title">Chirurgia</div>
         <div class="home-card-desc">Programmazione interventi chirurgici</div>
       </div>
+      <div class="home-card-chevron">›</div>
     </div>
     <div class="home-card home-card-docs" onclick="openSection('docs')">
+      <div class="home-card-icon"><svg viewBox="0 0 24 24"><path d="M7 3h7l4 4v14a1 1 0 01-1 1H7a1 1 0 01-1-1V4a1 1 0 011-1z"/><path d="M14 3v4h4M9 12h6M9 16h6"/></svg></div>
       <div class="home-card-text">
         <div class="home-card-title">Documenti</div>
         <div class="home-card-desc">Consensi informativi e schede per il paziente</div>
       </div>
+      <div class="home-card-chevron">›</div>
     </div>
     <div class="home-card home-card-storico" onclick="openSection('storico')">
+      <div class="home-card-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg></div>
       <div class="home-card-text">
         <div class="home-card-title">Storico Pazienti</div>
         <div class="home-card-desc">Cerca e consulta le schede archiviate</div>
       </div>
+      <div class="home-card-chevron">›</div>
     </div>
     <div class="home-card home-card-app" onclick="openSection('appuntamenti')">
+      <div class="home-card-icon"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/><circle cx="8.5" cy="14.5" r="1" fill="#fff" stroke="none"/><circle cx="12" cy="14.5" r="1" fill="#fff" stroke="none"/><circle cx="15.5" cy="14.5" r="1" fill="#fff" stroke="none"/></svg></div>
       <div class="home-card-text">
         <div class="home-card-title">Appuntamenti</div>
         <div class="home-card-desc">Calendario visite e trattamenti</div>
       </div>
+      <div class="home-card-chevron">›</div>
     </div>
   </div>
 </div>
@@ -3475,7 +3487,7 @@ function clearFotoGallery(sezione){
 
 if('serviceWorker' in navigator){
   window.addEventListener('load', function(){
-    navigator.serviceWorker.register('/care-note/sw.js?v=7')
+    navigator.serviceWorker.register('/care-note/sw.js?v=8')
       .then(function(reg){ console.log('SW registered'); })
       .catch(function(err){ console.log('SW error:', err); });
   });
