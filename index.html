@@ -1596,9 +1596,9 @@ function addFooter(doc){
   for(var i=1;i<=np;i++){doc.setPage(i);doc.setFont('helvetica','normal');doc.setFontSize(7);doc.setTextColor(160,160,160);doc.line(14,284,196,284);doc.text('Dr. Simone Caccetta — Documento medico riservato — GDPR Reg. UE 2016/679',14,288);doc.text('Pag. '+i+'/'+np,196,288,{align:'right'});}
 }
 
-function salvaPDFEst(){
+function costruisciPDFEst(){
   var jsPDFClass=getJsPDF();
-  if(!jsPDFClass){showToast('Libreria PDF in caricamento, riprovare tra un secondo.');return;}
+  if(!jsPDFClass){showToast('Libreria PDF in caricamento, riprovare tra un secondo.');return null;}
   try{
     var doc=new jsPDFClass({orientation:'portrait',unit:'mm',format:'a4'});
     var SAGE=[142,158,154];
@@ -1656,15 +1656,21 @@ function salvaPDFEst(){
     });
     try{y=addFotoToPDF(doc,y,'est');}catch(e){}
     addFooter(doc);
-    var cognome=(get('e-cognome')||'Paziente').replace(/\s+/g,'_');
-    doc.save('Estetica_'+cognome+'_'+new Date().toISOString().split('T')[0]+'.pdf');
-    showToast('PDF salvato!');
-  }catch(e){showToast('Errore PDF: '+e.message);}
+    return doc;
+  }catch(e){showToast('Errore PDF: '+e.message);return null;}
 }
 
-function salvaPDFChir(){
+function salvaPDFEst(){
+  var doc=costruisciPDFEst();
+  if(!doc)return;
+  var cognome=(get('e-cognome')||'Paziente').replace(/\s+/g,'_');
+  doc.save('Estetica_'+cognome+'_'+new Date().toISOString().split('T')[0]+'.pdf');
+  showToast('PDF salvato!');
+}
+
+function costruisciPDFChir(){
   var jsPDFClass=getJsPDF();
-  if(!jsPDFClass){showToast('Libreria PDF in caricamento, riprovare tra un secondo.');return;}
+  if(!jsPDFClass){showToast('Libreria PDF in caricamento, riprovare tra un secondo.');return null;}
   try{
     var doc=new jsPDFClass({orientation:'portrait',unit:'mm',format:'a4'});
     var SAGE=[142,158,154];
@@ -1712,10 +1718,16 @@ function salvaPDFChir(){
     }
     try{y=addFotoToPDF(doc,y,'chir');}catch(e){}
     addFooter(doc);
-    var cognome=(get('c-cognome')||'Paziente').replace(/\s+/g,'_');
-    doc.save('Mammella_'+cognome+'_'+new Date().toISOString().split('T')[0]+'.pdf');
-    showToast('PDF salvato!');
-  }catch(e){showToast('Errore PDF: '+e.message);}
+    return doc;
+  }catch(e){showToast('Errore PDF: '+e.message);return null;}
+}
+
+function salvaPDFChir(){
+  var doc=costruisciPDFChir();
+  if(!doc)return;
+  var cognome=(get('c-cognome')||'Paziente').replace(/\s+/g,'_');
+  doc.save('Mammella_'+cognome+'_'+new Date().toISOString().split('T')[0]+'.pdf');
+  showToast('PDF salvato!');
 }
 
 function salvaPDFAltro(){
@@ -2047,6 +2059,7 @@ function apriProfilo(nomeEnc){
       var data=s.dataTratt||'';
       var saved=s.ts?new Date(s.ts).toLocaleDateString('it-IT'):'';
       var fotos=(s.raw&&s.raw.foto)||[];
+      var pdfUrl=(s.raw&&s.raw.pdfUrl)||'';
       var fotoStrip='';
       if(fotos.length){
         fotoStrip='<div style="display:flex;gap:6px;overflow-x:auto;margin-top:8px;padding-bottom:2px;">'
@@ -2055,11 +2068,14 @@ function apriProfilo(nomeEnc){
           }).join('')
           +'</div>';
       }
+      var apriAzione = pdfUrl
+        ? "apriPdfStorico('"+encodeURIComponent(pdfUrl)+"')"
+        : "showToast('PDF non disponibile per questa scheda (salvata prima dell\\'aggiornamento)')";
       return '<div class="scheda-card" data-key="'+s.key+'" data-sbid="'+(s.sbId||'')+'">'
-        +'<div onclick="apriScheda(this.closest(\'.scheda-card\').dataset.key,\''+s.tipo+'\')" style="cursor:pointer;">'
+        +'<div onclick="'+apriAzione+'" style="cursor:pointer;">'
         +'<div class="scheda-card-header"><div class="scheda-card-name" style="font-size:14px;">'+(data||saved)+'</div>'+badge+'</div>'
         +(info.length?'<div class="scheda-card-info">'+info.join(' · ')+'</div>':'')
-        +'<div class="scheda-card-meta">'+(saved?'Salvato: '+saved:'')+'</div>'
+        +'<div class="scheda-card-meta">'+(saved?'Salvato: '+saved:'')+(pdfUrl?' · <span style="color:#8E9E9A;font-weight:700;">Tocca per aprire il PDF</span>':'')+'</div>'
         +fotoStrip
         +'</div>'
         +'<button onclick="var c=this.closest(\'.scheda-card\');eliminaScheda(c.dataset.key,c.dataset.sbid||null)" style="margin-top:8px;width:100%;height:34px;border-radius:8px;border:0.5px solid rgba(192,57,43,.2);background:rgba(192,57,43,.06);color:#C0392B;font-family:inherit;font-weight:700;font-size:12px;cursor:pointer;">Elimina</button>'
@@ -2105,6 +2121,11 @@ function nuovaSchedaPaziente(tipo){
     openSection('chir');
     setTimeout(function(){openIntervento('mammella');switchTabChir(0);},100);
   }
+}
+
+function apriPdfStorico(urlEnc){
+  var url = decodeURIComponent(urlEnc);
+  window.open(url, '_blank');
 }
 
 function apriScheda(key, tipo){
@@ -2372,6 +2393,39 @@ async function sbAggiornalScheda(id, tipo, cognome, nome, dati) {
   }
 }
 
+async function sbCaricaPDFStorico(schedaId, blob, nomeFile) {
+  try {
+    var path = schedaId + '/scheda.pdf';
+    var uploadRes = await fetch(SB_URL + '/storage/v1/object/foto-pazienti/' + path, {
+      method: 'POST',
+      headers: {
+        'apikey': SB_KEY,
+        'Authorization': 'Bearer ' + SB_KEY,
+        'Content-Type': 'application/pdf',
+        'x-upsert': 'true'
+      },
+      body: blob
+    });
+    if(!uploadRes.ok){
+      // riprova con PUT nel caso il file esista già (upload precedente)
+      var putRes = await fetch(SB_URL + '/storage/v1/object/foto-pazienti/' + path, {
+        method: 'PUT',
+        headers: {
+          'apikey': SB_KEY,
+          'Authorization': 'Bearer ' + SB_KEY,
+          'Content-Type': 'application/pdf'
+        },
+        body: blob
+      });
+      if(!putRes.ok) throw new Error('Upload PDF fallito: ' + putRes.status);
+    }
+    return SB_URL + '/storage/v1/object/public/foto-pazienti/' + path;
+  } catch(e) {
+    console.error('PDF upload error:', e);
+    return null;
+  }
+}
+
 async function sbCaricaFoto(schedaId, file, tipofoto) {
   try {
     var ext = file.name.split('.').pop();
@@ -2481,19 +2535,30 @@ async function salvaEst() {
   if(sbIdEst) await uploadPendingFotos(sbIdEst, 'est');
   dati.foto = await finalizzaFotoPerSalvataggio('est', sbIdEst);
   
-  // Save to localStorage (ora con i riferimenti foto inclusi)
+  // Genera il PDF definitivo (con le foto già corrette) UNA volta sola:
+  // lo archivia come copia scaricabile nello storico e lo scarica in locale
+  var docEst = costruisciPDFEst();
+  var fileNamePdfEst = 'Estetica_'+(cognome||'Paziente').replace(/\s+/g,'_')+'_'+new Date().toISOString().split('T')[0]+'.pdf';
+  if(docEst){
+    if(sbIdEst){
+      try{
+        var pdfUrlEst = await sbCaricaPDFStorico(sbIdEst, docEst.output('blob'), fileNamePdfEst);
+        if(pdfUrlEst) dati.pdfUrl = pdfUrlEst;
+      }catch(e){}
+    }
+    try{ docEst.save(fileNamePdfEst); }catch(e){}
+  }
+  
+  // Save to localStorage (ora con i riferimenti foto e il link al PDF inclusi)
   localStorage.setItem(schedaIdEst, JSON.stringify(dati));
   localStorage.setItem('sc_last_est', schedaIdEst);
   
-  // Ri-sincronizza su Supabase cosi anche li la scheda include dati.foto
+  // Ri-sincronizza su Supabase cosi anche li la scheda include dati.foto e dati.pdfUrl
   if(sbIdEst) await sbAggiornalScheda(sbIdEst, 'est', cognome, nome, dati);
-  
-  // Generate and download PDF
-  try{salvaPDFEst();}catch(e){showToast('Scheda salvata, errore PDF: '+e.message);}
   
   var el=document.getElementById('dot-est');if(el)el.style.background='#30D158';
   var se=document.getElementById('saved-est');if(se)se.textContent='Salvato alle '+new Date().getHours()+':'+String(new Date().getMinutes()).padStart(2,'0');
-  showToast('Scheda salvata!');
+  showToast('Scheda e PDF salvati!');
 }
 
 async function salvaChir() {
@@ -2521,19 +2586,30 @@ async function salvaChir() {
   if(sbIdChir) await uploadPendingFotos(sbIdChir, 'chir');
   dati.foto = await finalizzaFotoPerSalvataggio('chir', sbIdChir);
   
-  // Save to localStorage (ora con i riferimenti foto inclusi)
+  // Genera il PDF definitivo (con le foto già corrette) UNA volta sola:
+  // lo archivia come copia scaricabile nello storico e lo scarica in locale
+  var docChir = costruisciPDFChir();
+  var fileNamePdfChir = 'Mammella_'+(cognome||'Paziente').replace(/\s+/g,'_')+'_'+new Date().toISOString().split('T')[0]+'.pdf';
+  if(docChir){
+    if(sbIdChir){
+      try{
+        var pdfUrlChir = await sbCaricaPDFStorico(sbIdChir, docChir.output('blob'), fileNamePdfChir);
+        if(pdfUrlChir) dati.pdfUrl = pdfUrlChir;
+      }catch(e){}
+    }
+    try{ docChir.save(fileNamePdfChir); }catch(e){}
+  }
+  
+  // Save to localStorage (ora con i riferimenti foto e il link al PDF inclusi)
   localStorage.setItem(schedaIdChir, JSON.stringify(dati));
   localStorage.setItem('sc_last_chir', schedaIdChir);
   
-  // Ri-sincronizza su Supabase cosi anche li la scheda include dati.foto
+  // Ri-sincronizza su Supabase cosi anche li la scheda include dati.foto e dati.pdfUrl
   if(sbIdChir) await sbAggiornalScheda(sbIdChir, 'chir', cognome, nome, dati);
-  
-  // Generate and download PDF
-  try{salvaPDFChir();}catch(e){showToast('Scheda salvata, errore PDF: '+e.message);}
   
   var elc=document.getElementById('dot-chir');if(elc)elc.style.background='#30D158';
   var sc=document.getElementById('saved-chir');if(sc)sc.textContent='Salvato alle '+new Date().getHours()+':'+String(new Date().getMinutes()).padStart(2,'0');
-  showToast('Scheda salvata!');
+  showToast('Scheda e PDF salvati!');
 }
 
 async function salvaAltro() {
