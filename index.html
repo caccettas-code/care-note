@@ -34,6 +34,7 @@ input,textarea,button,select{font-family:var(--fnt);font-weight:700;}
 .home-card-chir{background:rgba(110,132,128,.55);backdrop-filter:blur(12px);border:1px solid rgba(110,132,128,.35);}
 .home-card-docs{background:rgba(160,155,145,.45);backdrop-filter:blur(12px);border:1px solid rgba(150,145,135,.35);}
 .home-card-storico{background:rgba(130,140,148,.45);backdrop-filter:blur(12px);border:1px solid rgba(120,130,138,.35);}
+.home-card-app{background:rgba(196,164,132,.5);backdrop-filter:blur(12px);border:1px solid rgba(186,154,122,.35);}
 .home-card-icon{font-size:36px;flex-shrink:0;}
 .home-card-text{}
 .home-card-title{font-size:18px;font-weight:700;color:#1C1C1E;margin-bottom:4px;}
@@ -202,6 +203,12 @@ input,textarea,button,select{font-family:var(--fnt);font-weight:700;}
       <div class="home-card-text">
         <div class="home-card-title">Storico Pazienti</div>
         <div class="home-card-desc">Cerca e consulta le schede archiviate</div>
+      </div>
+    </div>
+    <div class="home-card home-card-app" onclick="openSection('appuntamenti')">
+      <div class="home-card-text">
+        <div class="home-card-title">Appuntamenti</div>
+        <div class="home-card-desc">Calendario visite e trattamenti</div>
       </div>
     </div>
   </div>
@@ -972,6 +979,58 @@ input,textarea,button,select{font-family:var(--fnt);font-weight:700;}
   <input type="file" id="doc-file-input" accept="application/pdf" style="display:none;" onchange="docFileSelected(this)">
 </div>
 
+<!-- ══ APP APPUNTAMENTI ══ -->
+<div id="app-appuntamenti" style="display:none;">
+  <div class="hdr" style="background:rgba(196,164,132,.85);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:0.5px solid rgba(186,154,122,.3);">
+    <div class="hdr-top">
+      <button class="hdr-back" onclick="goHome()">← Home</button>
+      <div>
+        <div class="hdr-name">Appuntamenti</div>
+        <div class="hdr-sub">Dr. Simone Caccetta</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="padding:16px 16px 100px;">
+    <!-- Header mese con frecce -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+      <button onclick="calMeseVar(-1)" style="width:38px;height:38px;border-radius:10px;border:0.5px solid rgba(0,0,0,.1);background:#fff;font-size:16px;cursor:pointer;">‹</button>
+      <div id="cal-mese-label" style="font-weight:700;font-size:16px;"></div>
+      <button onclick="calMeseVar(1)" style="width:38px;height:38px;border-radius:10px;border:0.5px solid rgba(0,0,0,.1);background:#fff;font-size:16px;cursor:pointer;">›</button>
+    </div>
+
+    <!-- Intestazione giorni settimana -->
+    <div id="cal-weekdays" style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:6px;"></div>
+    <!-- Griglia giorni -->
+    <div id="cal-grid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:20px;"></div>
+
+    <!-- Lista appuntamenti del giorno selezionato -->
+    <div class="group-label" id="cal-giorno-label">Appuntamenti</div>
+    <div id="cal-lista-appuntamenti" class="list"></div>
+
+    <button onclick="apriFormAppuntamento()" style="width:100%;height:48px;border-radius:12px;border:none;background:#8E6B4C;color:#fff;font-family:inherit;font-weight:700;font-size:14px;cursor:pointer;margin-top:16px;">+ Nuovo appuntamento</button>
+  </div>
+</div>
+
+<!-- ══ MODAL NUOVO APPUNTAMENTO ══ -->
+<div id="app-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:250;align-items:center;justify-content:center;padding:20px;">
+  <div style="background:#fff;border-radius:16px;padding:24px;width:100%;max-width:420px;">
+    <div style="font-weight:700;font-size:17px;margin-bottom:16px;">Nuovo appuntamento</div>
+    <label style="font-size:12px;color:#8E8E93;font-weight:700;">Data</label>
+    <input type="date" id="app-form-data" style="width:100%;height:44px;border-radius:10px;border:1px solid #D1D1D6;padding:0 12px;margin:6px 0 14px;font-size:15px;box-sizing:border-box;">
+    <label style="font-size:12px;color:#8E8E93;font-weight:700;">Orario</label>
+    <input type="time" id="app-form-ora" style="width:100%;height:44px;border-radius:10px;border:1px solid #D1D1D6;padding:0 12px;margin:6px 0 14px;font-size:15px;box-sizing:border-box;">
+    <label style="font-size:12px;color:#8E8E93;font-weight:700;">Nome paziente</label>
+    <input type="text" id="app-form-paziente" placeholder="Cognome e nome" style="width:100%;height:44px;border-radius:10px;border:1px solid #D1D1D6;padding:0 12px;margin:6px 0 14px;font-size:15px;box-sizing:border-box;">
+    <label style="font-size:12px;color:#8E8E93;font-weight:700;">Tipo di trattamento</label>
+    <input type="text" id="app-form-trattamento" placeholder="Es. Filler, Botox, Consulto..." style="width:100%;height:44px;border-radius:10px;border:1px solid #D1D1D6;padding:0 12px;margin:6px 0 20px;font-size:15px;box-sizing:border-box;">
+    <div style="display:flex;gap:10px;">
+      <button onclick="chiudiFormAppuntamento()" style="flex:1;height:46px;border-radius:12px;border:0.5px solid #D1D1D6;background:#fff;font-family:inherit;font-weight:700;font-size:14px;cursor:pointer;">Annulla</button>
+      <button onclick="salvaAppuntamento()" style="flex:1;height:46px;border-radius:12px;border:none;background:#8E6B4C;color:#fff;font-family:inherit;font-weight:700;font-size:14px;cursor:pointer;">Salva</button>
+    </div>
+  </div>
+</div>
+
 <!-- ══ MODAL FIRMA ══ -->
 <div id="ys-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:200;padding:20px;align-items:center;justify-content:center;">
   <div class="ys-modal-inner">
@@ -1021,6 +1080,9 @@ function openSection(sec){
   } else if(sec==='storico'){
     document.getElementById('app-storico').style.display='block';
     aggiornaStorico();
+  } else if(sec==='appuntamenti'){
+    document.getElementById('app-appuntamenti').style.display='block';
+    initCalendario();
   }
 }
 
@@ -1042,7 +1104,7 @@ function openIntervento(tipo){
 
 function goHome(){
   currentSection='';
-  ['app-est','app-chir','app-docs','app-storico','app-cartelle'].forEach(function(id){
+  ['app-est','app-chir','app-docs','app-storico','app-cartelle','app-appuntamenti'].forEach(function(id){
     var el=document.getElementById(id);if(el)el.style.display='none';
   });
   currentInterventoChir='';
@@ -2594,6 +2656,158 @@ function eliminaCartellaCorrente(){
     renderCartelle();
   });
 }
+
+// ── APPUNTAMENTI ────────────────────────────────────────────────────────────
+var calAnno, calMese; // mese 0-11
+var calGiornoSel = null; // 'YYYY-MM-DD'
+var appuntamentiCache = [];
+var MESI_IT = ['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'];
+var GG_IT = ['Lun','Mar','Mer','Gio','Ven','Sab','Dom'];
+
+function pad2(n){ return n<10 ? '0'+n : ''+n; }
+function isoData(y,m,d){ return y+'-'+pad2(m+1)+'-'+pad2(d); }
+
+function initCalendario(){
+  var oggi = new Date();
+  calAnno = oggi.getFullYear();
+  calMese = oggi.getMonth();
+  calGiornoSel = isoData(oggi.getFullYear(), oggi.getMonth(), oggi.getDate());
+  caricaAppuntamenti().then(renderCalendario);
+}
+
+function calMeseVar(delta){
+  calMese += delta;
+  if(calMese<0){ calMese=11; calAnno--; }
+  if(calMese>11){ calMese=0; calAnno++; }
+  renderCalendario();
+}
+
+async function caricaAppuntamenti(){
+  try{
+    var res = await fetch(SB_URL + '/rest/v1/appuntamenti?select=*&order=data.asc,ora.asc', { headers: sbHeaders() });
+    if(!res.ok){ appuntamentiCache = []; return; }
+    var rows = await res.json();
+    appuntamentiCache = Array.isArray(rows) ? rows : [];
+  }catch(e){ appuntamentiCache = []; }
+}
+
+function renderCalendario(){
+  document.getElementById('cal-mese-label').textContent = MESI_IT[calMese] + ' ' + calAnno;
+
+  var wd = document.getElementById('cal-weekdays');
+  wd.innerHTML = GG_IT.map(function(g){ return '<div style="text-align:center;font-size:11px;font-weight:700;color:#8E8E93;">'+g+'</div>'; }).join('');
+
+  var primoGiorno = new Date(calAnno, calMese, 1);
+  var startOffset = (primoGiorno.getDay()+6)%7; // lun=0
+  var giorniMese = new Date(calAnno, calMese+1, 0).getDate();
+  var oggiIso = isoData(new Date().getFullYear(), new Date().getMonth(), new Date().getDate());
+
+  var conteggi = {};
+  appuntamentiCache.forEach(function(a){ conteggi[a.data] = (conteggi[a.data]||0)+1; });
+
+  var celle = '';
+  for(var i=0;i<startOffset;i++){ celle += '<div></div>'; }
+  for(var d=1; d<=giorniMese; d++){
+    var iso = isoData(calAnno, calMese, d);
+    var isSel = iso===calGiornoSel;
+    var isOggi = iso===oggiIso;
+    var haApp = conteggi[iso]>0;
+    celle += '<div onclick="selezionaGiorno(\''+iso+'\')" style="cursor:pointer;aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:10px;'
+      + (isSel ? 'background:#8E6B4C;color:#fff;' : (isOggi ? 'background:rgba(142,107,76,.12);' : ''))
+      + '">'
+      + '<span style="font-size:14px;font-weight:'+(isOggi?'800':'500')+';">'+d+'</span>'
+      + (haApp ? '<span style="width:5px;height:5px;border-radius:50%;background:'+(isSel?'#fff':'#8E6B4C')+';margin-top:2px;"></span>' : '')
+      + '</div>';
+  }
+  document.getElementById('cal-grid').innerHTML = celle;
+
+  renderListaGiorno();
+}
+
+function selezionaGiorno(iso){
+  calGiornoSel = iso;
+  renderCalendario();
+}
+
+function renderListaGiorno(){
+  var d = new Date(calGiornoSel+'T00:00:00');
+  var labelGiorno = d.toLocaleDateString('it-IT', {weekday:'long', day:'numeric', month:'long'});
+  document.getElementById('cal-giorno-label').textContent = labelGiorno.charAt(0).toUpperCase()+labelGiorno.slice(1);
+
+  var delGiorno = appuntamentiCache.filter(function(a){ return a.data===calGiornoSel; })
+    .sort(function(a,b){ return (a.ora||'').localeCompare(b.ora||''); });
+
+  var el = document.getElementById('cal-lista-appuntamenti');
+  if(!delGiorno.length){
+    el.innerHTML = '<div class="row"><span class="row-lbl" style="color:#8E8E93;">Nessun appuntamento</span></div>';
+    return;
+  }
+  el.innerHTML = delGiorno.map(function(a){
+    var ora = (a.ora||'').substring(0,5);
+    return '<div class="row">'
+      + '<span class="row-lbl"><b>'+ora+'</b> — '+ (a.paziente||'') + (a.trattamento? ' <span style="color:#8E8E93;">· '+a.trattamento+'</span>' : '') + '</span>'
+      + '<button onclick="eliminaAppuntamento(\''+a.id+'\')" style="border:none;background:none;color:#C0392B;font-weight:700;font-size:13px;padding:0 16px;cursor:pointer;">Elimina</button>'
+      + '</div>';
+  }).join('');
+}
+
+function apriFormAppuntamento(){
+  document.getElementById('app-form-data').value = calGiornoSel;
+  document.getElementById('app-form-ora').value = '';
+  document.getElementById('app-form-paziente').value = '';
+  document.getElementById('app-form-trattamento').value = '';
+  document.getElementById('app-modal').style.display = 'flex';
+}
+
+function chiudiFormAppuntamento(){
+  document.getElementById('app-modal').style.display = 'none';
+}
+
+async function salvaAppuntamento(){
+  var data = document.getElementById('app-form-data').value;
+  var ora = document.getElementById('app-form-ora').value;
+  var paziente = document.getElementById('app-form-paziente').value.trim();
+  var trattamento = document.getElementById('app-form-trattamento').value.trim();
+
+  if(!data || !ora || !paziente){
+    showToast('Compila almeno data, orario e nome paziente');
+    return;
+  }
+
+  showToast('Salvataggio...');
+  try{
+    var res = await fetch(SB_URL + '/rest/v1/appuntamenti', {
+      method: 'POST',
+      headers: sbHeaders(),
+      body: JSON.stringify({ data: data, ora: ora, paziente: paziente, trattamento: trattamento })
+    });
+    if(!res.ok){
+      var errText = await res.text();
+      showToast('Errore salvataggio: ' + errText.substring(0,150));
+      return;
+    }
+    chiudiFormAppuntamento();
+    calGiornoSel = data;
+    await caricaAppuntamenti();
+    renderCalendario();
+    showToast('Appuntamento salvato');
+  }catch(e){
+    showToast('Errore: ' + e.message);
+  }
+}
+
+function eliminaAppuntamento(id){
+  if(!confirm('Eliminare questo appuntamento?')) return;
+  showToast('Eliminazione...');
+  fetch(SB_URL + '/rest/v1/appuntamenti?id=eq.' + id, { method:'DELETE', headers: sbHeaders() })
+    .then(async function(){
+      await caricaAppuntamenti();
+      renderCalendario();
+      showToast('Appuntamento eliminato');
+    })
+    .catch(function(e){ showToast('Errore: ' + e.message); });
+}
+
 var SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJpa2Z3bG56Y3pidmd6c2FuZndjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMxNzI5NzgsImV4cCI6MjA5ODc0ODk3OH0.gUiR3uEwbBHN1t_z-ec8d_uDBpiJgLRprf3x3rtd1ok';
 
 function sbHeaders() {
