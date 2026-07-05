@@ -1556,26 +1556,39 @@ function addYN(doc,y,label,val){
 function addFotoToPDF(doc, y, sezione){
   var fotos=getFotoTitoli(sezione);
   if(!fotos||!fotos.length)return y;
-  var W=210,ml=14,cw=182,SAGE=[142,158,154];
+  var ml=14,cw=182,SAGE=[142,158,154];
   if(y+12>272){doc.addPage();y=14;}
   doc.setFillColor(SAGE[0],SAGE[1],SAGE[2]);doc.roundedRect(ml,y,cw,8,1.5,1.5,'F');
   doc.setTextColor(28,28,30);doc.setFont('helvetica','bold');doc.setFontSize(8.5);
   doc.text('FOTOGRAFIE CLINICHE',ml+4,y+5.5);y+=11;
-  var imgW=85,imgH=60,gap=12;
+
+  var maxW=85,maxH=58,gap=12,capH=5,rowGap=8;
+  var rowTop=y;
   fotos.forEach(function(f,idx){
     var col=idx%2;
-    var x=ml+(col*(imgW+gap));
-    if(col===0&&idx>0){y+=imgH+18;}
-    if(y+imgH+18>272){doc.addPage();y=14;}
-    try{doc.addImage(f.src,'JPEG',x,y,imgW,imgH);}
-    catch(e){try{doc.addImage(f.src,'PNG',x,y,imgW,imgH);}catch(e2){}}
+    if(col===0&&idx>0){ rowTop=rowTop+capH+maxH+rowGap; }
+    if(col===0&&(rowTop+capH+maxH+16>272)){ doc.addPage(); rowTop=14; }
+    var x=ml+(col*(maxW+gap));
+
+    // Didascalia SOPRA la foto, come richiesto
     if(f.titolo&&f.titolo.trim()){
       doc.setFont('helvetica','italic');doc.setFontSize(7);doc.setTextColor(80,80,80);
-      doc.text(f.titolo.substring(0,45),x,y+imgH+5,{maxWidth:imgW});
+      doc.text(f.titolo.substring(0,45),x,rowTop+3.5,{maxWidth:maxW});
     }
-    if(col===1||idx===fotos.length-1){if(idx===fotos.length-1)y+=imgH+16;}
+    var imgY=rowTop+capH;
+
+    // Adatta l'immagine mantenendo le proporzioni originali (niente distorsione)
+    var iw=f.w||maxW, ih=f.h||maxH;
+    var scale=Math.min(maxW/iw, maxH/ih);
+    var dw=iw*scale, dh=ih*scale;
+    var dx=x+(maxW-dw)/2, dy=imgY+(maxH-dh)/2;
+
+    try{doc.addImage(f.src,'JPEG',dx,dy,dw,dh);}
+    catch(e){try{doc.addImage(f.src,'PNG',dx,dy,dw,dh);}catch(e2){}}
+
+    if(idx===fotos.length-1){ y = rowTop+capH+maxH+rowGap; }
   });
-  return y+4;
+  return y;
 }
 
 function addFooter(doc){
@@ -2033,11 +2046,21 @@ function apriProfilo(nomeEnc){
       if(s.intervento)info.push(s.intervento);
       var data=s.dataTratt||'';
       var saved=s.ts?new Date(s.ts).toLocaleDateString('it-IT'):'';
+      var fotos=(s.raw&&s.raw.foto)||[];
+      var fotoStrip='';
+      if(fotos.length){
+        fotoStrip='<div style="display:flex;gap:6px;overflow-x:auto;margin-top:8px;padding-bottom:2px;">'
+          +fotos.map(function(f){
+            return '<img src="'+f.src+'" title="'+(f.titolo?f.titolo.replace(/"/g,'&quot;'):'')+'" style="width:52px;height:52px;object-fit:cover;border-radius:8px;flex-shrink:0;cursor:pointer;" onclick="event.stopPropagation();window.open(this.src,\'_blank\')">';
+          }).join('')
+          +'</div>';
+      }
       return '<div class="scheda-card" data-key="'+s.key+'" data-sbid="'+(s.sbId||'')+'">'
         +'<div onclick="apriScheda(this.closest(\'.scheda-card\').dataset.key,\''+s.tipo+'\')" style="cursor:pointer;">'
         +'<div class="scheda-card-header"><div class="scheda-card-name" style="font-size:14px;">'+(data||saved)+'</div>'+badge+'</div>'
         +(info.length?'<div class="scheda-card-info">'+info.join(' · ')+'</div>':'')
         +'<div class="scheda-card-meta">'+(saved?'Salvato: '+saved:'')+'</div>'
+        +fotoStrip
         +'</div>'
         +'<button onclick="var c=this.closest(\'.scheda-card\');eliminaScheda(c.dataset.key,c.dataset.sbid||null)" style="margin-top:8px;width:100%;height:34px;border-radius:8px;border:0.5px solid rgba(192,57,43,.2);background:rgba(192,57,43,.06);color:#C0392B;font-family:inherit;font-weight:700;font-size:12px;cursor:pointer;">Elimina</button>'
         +'</div>';
@@ -2447,19 +2470,23 @@ async function salvaEst() {
   dati.ts = new Date().toISOString();
   dati.tipo = 'est';
   
-  // Save to localStorage
-  localStorage.setItem(schedaIdEst, JSON.stringify(dati));
-  localStorage.setItem('sc_last_est', schedaIdEst);
-  
-  // Save to Supabase
+  // Save to Supabase (prima, cosi le foto hanno uno schedaId a cui agganciarsi)
   if(sbIdEst) {
     await sbAggiornalScheda(sbIdEst, 'est', cognome, nome, dati);
   } else {
     sbIdEst = await sbSalvaScheda('est', cognome, nome, dati);
   }
   
-  // Upload pending photos
+  // Upload pending photos + raccogli i riferimenti (url o base64) nella scheda
   if(sbIdEst) await uploadPendingFotos(sbIdEst, 'est');
+  dati.foto = await finalizzaFotoPerSalvataggio('est', sbIdEst);
+  
+  // Save to localStorage (ora con i riferimenti foto inclusi)
+  localStorage.setItem(schedaIdEst, JSON.stringify(dati));
+  localStorage.setItem('sc_last_est', schedaIdEst);
+  
+  // Ri-sincronizza su Supabase cosi anche li la scheda include dati.foto
+  if(sbIdEst) await sbAggiornalScheda(sbIdEst, 'est', cognome, nome, dati);
   
   // Generate and download PDF
   try{salvaPDFEst();}catch(e){showToast('Scheda salvata, errore PDF: '+e.message);}
@@ -2483,19 +2510,23 @@ async function salvaChir() {
   dati.ts = new Date().toISOString();
   dati.tipo = 'chir';
   
-  // Save to localStorage
-  localStorage.setItem(schedaIdChir, JSON.stringify(dati));
-  localStorage.setItem('sc_last_chir', schedaIdChir);
-  
-  // Save to Supabase
+  // Save to Supabase (prima, cosi le foto hanno uno schedaId a cui agganciarsi)
   if(sbIdChir) {
     await sbAggiornalScheda(sbIdChir, 'chir', cognome, nome, dati);
   } else {
     sbIdChir = await sbSalvaScheda('chir', cognome, nome, dati);
   }
   
-  // Upload pending photos
+  // Upload pending photos + raccogli i riferimenti (url o base64) nella scheda
   if(sbIdChir) await uploadPendingFotos(sbIdChir, 'chir');
+  dati.foto = await finalizzaFotoPerSalvataggio('chir', sbIdChir);
+  
+  // Save to localStorage (ora con i riferimenti foto inclusi)
+  localStorage.setItem(schedaIdChir, JSON.stringify(dati));
+  localStorage.setItem('sc_last_chir', schedaIdChir);
+  
+  // Ri-sincronizza su Supabase cosi anche li la scheda include dati.foto
+  if(sbIdChir) await sbAggiornalScheda(sbIdChir, 'chir', cognome, nome, dati);
   
   // Generate and download PDF
   try{salvaPDFChir();}catch(e){showToast('Scheda salvata, errore PDF: '+e.message);}
@@ -2627,6 +2658,64 @@ async function caricaFotoScheda(sbId, sezione) {
 // ── FOTO GALLERY ──────────────────────────────────────────────────────────────
 var fotoData = {est: [], chir: [], profilo: []};
 
+// Legge il file rispettando l'orientamento EXIF (risolve le foto scattate che
+// arrivano ruotate) e la ridimensiona per non appesantire storage/localStorage.
+async function correggiOrientamentoFoto(file){
+  try{
+    var bitmap = await createImageBitmap(file, {imageOrientation:'from-image'});
+    var maxDim = 1600;
+    var w = bitmap.width, h = bitmap.height;
+    var scale = Math.min(1, maxDim/Math.max(w,h));
+    var canvas = document.createElement('canvas');
+    canvas.width = Math.round(w*scale);
+    canvas.height = Math.round(h*scale);
+    var ctx = canvas.getContext('2d');
+    ctx.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+    var dataUrl = canvas.toDataURL('image/jpeg', 0.88);
+    var blob = await new Promise(function(res){ canvas.toBlob(res, 'image/jpeg', 0.88); });
+    var correctedFile = blob ? new File([blob], (file.name||'foto')+'.jpg', {type:'image/jpeg'}) : file;
+    return {dataUrl: dataUrl, file: correctedFile, width: canvas.width, height: canvas.height};
+  }catch(e){
+    return null; // browser non supporta createImageBitmap con imageOrientation: si userà il fallback
+  }
+}
+
+async function processFotoFile(file, sezione, gallery){
+  var corrected = await correggiOrientamentoFoto(file);
+  var src, uploadFile, w, h;
+  if(corrected){
+    src = corrected.dataUrl; uploadFile = corrected.file; w = corrected.width; h = corrected.height;
+  } else {
+    src = await new Promise(function(res){ var r=new FileReader(); r.onload=function(e){res(e.target.result);}; r.readAsDataURL(file); });
+    uploadFile = file; w = null; h = null;
+  }
+
+  var fotoId = 'foto-' + Date.now() + '-' + Math.random().toString(36).substr(2,4);
+  var wrap = document.createElement('div');
+  wrap.className = 'foto-thumb-wrap';
+  wrap.id = fotoId;
+  wrap.innerHTML =
+    '<input class="foto-thumb-title-input" type="text" placeholder="Aggiungi titolo..." maxlength="80">'
+    +'<div class="foto-thumb-inner">'
+    +'<img class="foto-thumb-img" src="'+src+'">'
+    +'<button class="foto-thumb-delete" onclick="eliminaFoto(\''+fotoId+'\',\''+sezione+'\')">✕</button>'
+    +'</div>';
+  gallery.appendChild(wrap);
+
+  fotoData[sezione] = fotoData[sezione]||[];
+  fotoData[sezione].push({id: fotoId, src: src, w: w, h: h});
+
+  // Upload to Supabase (usa il file già corretto in orientamento)
+  var sbId = sezione==='est' ? sbIdEst : (sezione==='chir' ? sbIdChir : null);
+  if(sbId){
+    sbCaricaFoto(sbId, uploadFile, 'clinica').then(function(url){
+      if(url){ wrap.setAttribute('data-url', url); }
+    });
+  } else {
+    pendingFotos.push({file: uploadFile, tipo: 'clinica', sezione: sezione, wrapId: fotoId});
+  }
+}
+
 async function aggiungiFoto(input, sezione) {
   var files = input.files;
   if(!files||!files.length) return;
@@ -2634,37 +2723,7 @@ async function aggiungiFoto(input, sezione) {
   if(!gallery) return;
 
   for(var i=0;i<files.length;i++){
-    (function(file){
-      var reader = new FileReader();
-      reader.onload = function(e){
-        var fotoId = 'foto-' + Date.now() + '-' + Math.random().toString(36).substr(2,4);
-        var wrap = document.createElement('div');
-        wrap.className = 'foto-thumb-wrap';
-        wrap.id = fotoId;
-        wrap.innerHTML = 
-          '<input class="foto-thumb-title-input" type="text" placeholder="Aggiungi titolo..." maxlength="80">'
-          +'<div class="foto-thumb-inner">'
-          +'<img class="foto-thumb-img" src="'+e.target.result+'">'
-          +'<button class="foto-thumb-delete" onclick="eliminaFoto(\''+fotoId+'\',\''+sezione+'\')">✕</button>'
-          +'</div>';
-        gallery.appendChild(wrap);
-
-        // Upload to Supabase
-        var sbId = sezione==='est' ? sbIdEst : (sezione==='chir' ? sbIdChir : null);
-        if(sbId){
-          sbCaricaFoto(sbId, file, 'clinica').then(function(url){
-            if(url){ wrap.setAttribute('data-url', url); }
-          });
-        } else {
-          pendingFotos.push({file: file, tipo: 'clinica', sezione: sezione, wrapId: fotoId});
-        }
-
-        // Store base64 for PDF
-        fotoData[sezione] = fotoData[sezione]||[];
-        fotoData[sezione].push({id: fotoId, src: e.target.result});
-      };
-      reader.readAsDataURL(file);
-    })(files[i]);
+    await processFotoFile(files[i], sezione, gallery);
   }
   input.value = '';
 }
@@ -2683,9 +2742,34 @@ function getFotoTitoli(sezione){
   wraps.forEach(function(w){
     var img = w.querySelector('img');
     var title = w.querySelector('.foto-thumb-title-input');
-    if(img) result.push({src: img.src, titolo: title ? title.value : ''});
+    if(img) result.push({src: img.src, titolo: title ? title.value : '', w: img.naturalWidth||0, h: img.naturalHeight||0});
   });
   return result;
+}
+
+// Restituisce {url o dataURL, titolo} per ogni foto in galleria, garantendo che
+// l'upload su Supabase sia completato (o ritenta) prima di salvare i riferimenti
+// nella scheda, cosi la foto resta visibile anche riaprendo lo storico.
+async function finalizzaFotoPerSalvataggio(sezione, sbId){
+  var gallery = document.getElementById('foto-gallery-'+sezione);
+  if(!gallery) return [];
+  var wraps = Array.prototype.slice.call(gallery.querySelectorAll('.foto-thumb-wrap'));
+  var uploads = wraps.map(function(w){
+    if(w.getAttribute('data-url') || !sbId) return Promise.resolve();
+    var img = w.querySelector('img');
+    if(!img || !img.src) return Promise.resolve();
+    return fetch(img.src).then(function(r){ return r.blob(); }).then(function(blob){
+      var file = new File([blob], 'foto.jpg', {type: blob.type||'image/jpeg'});
+      return sbCaricaFoto(sbId, file, 'clinica');
+    }).then(function(url){ if(url) w.setAttribute('data-url', url); }).catch(function(){});
+  });
+  await Promise.all(uploads);
+  return wraps.map(function(w){
+    var img = w.querySelector('img');
+    var title = w.querySelector('.foto-thumb-title-input');
+    var url = w.getAttribute('data-url');
+    return {src: url || (img?img.src:''), titolo: title?title.value:''};
+  });
 }
 
 function clearFotoGallery(sezione){
