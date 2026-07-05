@@ -2386,6 +2386,8 @@ function sbHeaders() {
   };
 }
 
+var lastSbErrorMsg = '';
+
 async function sbSalvaScheda(tipo, cognome, nome, dati) {
   try {
     var res = await fetch(SB_URL + '/rest/v1/schede', {
@@ -2399,10 +2401,18 @@ async function sbSalvaScheda(tipo, cognome, nome, dati) {
         dati: dati
       })
     });
+    if(!res.ok){
+      var errText = '';
+      try{ errText = await res.text(); }catch(e2){}
+      lastSbErrorMsg = 'HTTP ' + res.status + (errText ? ': ' + errText.substring(0,200) : '');
+      return null;
+    }
     var rows = await res.json();
     if(Array.isArray(rows) && rows[0]) return rows[0].id;
+    lastSbErrorMsg = 'Risposta inattesa dal server';
     return null;
   } catch(e) {
+    lastSbErrorMsg = (e && e.message) ? e.message : String(e);
     console.error('Supabase save error:', e);
     return null;
   }
@@ -2410,7 +2420,7 @@ async function sbSalvaScheda(tipo, cognome, nome, dati) {
 
 async function sbAggiornalScheda(id, tipo, cognome, nome, dati) {
   try {
-    await fetch(SB_URL + '/rest/v1/schede?id=eq.' + id, {
+    var res = await fetch(SB_URL + '/rest/v1/schede?id=eq.' + id, {
       method: 'PATCH',
       headers: Object.assign({}, sbHeaders(), {'Prefer': 'return=minimal'}),
       body: JSON.stringify({
@@ -2422,8 +2432,15 @@ async function sbAggiornalScheda(id, tipo, cognome, nome, dati) {
         updated_at: new Date().toISOString()
       })
     });
+    if(!res.ok){
+      var errText = '';
+      try{ errText = await res.text(); }catch(e2){}
+      lastSbErrorMsg = 'HTTP ' + res.status + (errText ? ': ' + errText.substring(0,200) : '');
+      return false;
+    }
     return true;
   } catch(e) {
+    lastSbErrorMsg = (e && e.message) ? e.message : String(e);
     console.error('Supabase update error:', e);
     return false;
   }
@@ -2611,8 +2628,7 @@ async function salvaEst() {
   try{
     // Save to Supabase (prima, cosi le foto hanno uno schedaId a cui agganciarsi)
     if(sbIdEst) {
-      await sbAggiornalScheda(sbIdEst, 'est', cognome, nome, dati);
-      cloudOk = true;
+      cloudOk = await sbAggiornalScheda(sbIdEst, 'est', cognome, nome, dati);
     } else {
       sbIdEst = await sbSalvaScheda('est', cognome, nome, dati);
       if(!sbIdEst){ try{ sbIdEst = await sbSalvaScheda('est', cognome, nome, dati); }catch(e){} }
@@ -2643,7 +2659,7 @@ async function salvaEst() {
   localStorage.setItem('sc_last_est', schedaIdEst);
   
   if(!cloudOk){
-    showToast('Scheda salvata solo in locale: Supabase non raggiungibile. Il PDF nello storico non sarà disponibile finché non risalvi con connessione attiva.');
+    showToast('Scheda salvata solo in locale. Errore Supabase: ' + (lastSbErrorMsg || 'sconosciuto') + '. Il PDF nello storico non sarà disponibile finché non risalvi con connessione attiva.');
   } else if(!pdfArchiviato){
     showToast('Scheda salvata, ma il PDF non è stato archiviato online. Prova a salvare di nuovo tra poco.');
   } else {
@@ -2682,8 +2698,7 @@ async function salvaChir() {
   try{
     // Save to Supabase (prima, cosi le foto hanno uno schedaId a cui agganciarsi)
     if(sbIdChir) {
-      await sbAggiornalScheda(sbIdChir, 'chir', cognome, nome, dati);
-      cloudOk = true;
+      cloudOk = await sbAggiornalScheda(sbIdChir, 'chir', cognome, nome, dati);
     } else {
       sbIdChir = await sbSalvaScheda('chir', cognome, nome, dati);
       if(!sbIdChir){ try{ sbIdChir = await sbSalvaScheda('chir', cognome, nome, dati); }catch(e){} }
@@ -2714,7 +2729,7 @@ async function salvaChir() {
   localStorage.setItem('sc_last_chir', schedaIdChir);
   
   if(!cloudOk){
-    showToast('Scheda salvata solo in locale: Supabase non raggiungibile. Il PDF nello storico non sarà disponibile finché non risalvi con connessione attiva.');
+    showToast('Scheda salvata solo in locale. Errore Supabase: ' + (lastSbErrorMsg || 'sconosciuto') + '. Il PDF nello storico non sarà disponibile finché non risalvi con connessione attiva.');
   } else if(!pdfArchiviato){
     showToast('Scheda salvata, ma il PDF non è stato archiviato online. Prova a salvare di nuovo tra poco.');
   } else {
