@@ -23,12 +23,14 @@
   --txt:#1C1C1E;--txt3:#8E8E93;
   --fnt:"Poppins","Helvetica Neue",Helvetica,Arial,sans-serif;
 }
+html{background:#E4EAEA;}
 body{font-family:var(--fnt);font-weight:700;background:linear-gradient(160deg,#EEF1F0 0%,#E4EAEA 100%);min-height:100vh;color:var(--txt);font-size:16px;padding-bottom:88px;}
 input,textarea,button,select{font-family:var(--fnt);font-weight:700;}
 
 /* ── HOME ── */
 .home{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:32px 24px;background:linear-gradient(170deg,#C8D0CD 0%,#BEC6C3 100%);}
 .home-logo{font-size:22px;font-weight:700;color:#1C1C1E;margin-bottom:4px;letter-spacing:-.3px;}
+.logo-box{border:2px solid #1C1C1E;padding:18px 30px;text-align:center;font-family:"Poppins",sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;line-height:1.6;font-size:26px;color:#1C1C1E;margin-bottom:20px;background:transparent;}
 .home-sub{font-size:14px;color:var(--txt3);font-weight:400;margin-bottom:48px;text-align:center;}
 .home-cards{display:flex;flex-direction:column;gap:16px;width:100%;max-width:400px;}
 .home-card{border-radius:18px;padding:28px 24px;cursor:pointer;display:flex;align-items:center;gap:20px;box-shadow:0 2px 12px rgba(0,0,0,.08);transition:transform .1s;}
@@ -182,7 +184,10 @@ input,textarea,button,select{font-family:var(--fnt);font-weight:700;}
 
 <!-- ══ HOME ══ -->
 <div class="home" id="home-screen" style="display:flex!important;">
-  <img src="logo-studio-caccetta.png" alt="Studio Caccetta" style="width:220px;max-width:70vw;height:auto;margin-bottom:16px;">
+  <div class="logo-box">
+    <div>Studio</div>
+    <div>Caccetta</div>
+  </div>
   <div class="home-sub">Chirurgia Plastica, Ricostruttiva ed Estetica</div>
   <div class="home-cards">
     <div class="home-card home-card-est" onclick="openSection('est')">
@@ -3468,7 +3473,7 @@ function clearFotoGallery(sezione){
 
 if('serviceWorker' in navigator){
   window.addEventListener('load', function(){
-    navigator.serviceWorker.register('/care-note/sw.js?v=6')
+    navigator.serviceWorker.register('/care-note/sw.js?v=7')
       .then(function(reg){ console.log('SW registered'); })
       .catch(function(err){ console.log('SW error:', err); });
   });

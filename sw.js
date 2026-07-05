@@ -1,8 +1,7 @@
-const CACHE_NAME = 'schede-cliniche-v6';
+const CACHE_NAME = 'schede-cliniche-v7';
 const ASSETS = [
   '/care-note/',
   '/care-note/index.html',
-  '/care-note/logo-studio-caccetta.png',
   'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js'
 ];
 
