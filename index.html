@@ -894,6 +894,15 @@ input,textarea,button,select{font-family:var(--fnt);font-weight:700;}
 
   <div style="padding:20px 16px 0;">
 
+    <!-- CARTELLE E PROTOCOLLI -->
+    <div class="group-label">File e protocolli</div>
+    <div class="list">
+      <div class="row" style="cursor:pointer;" onclick="apriCartelle()">
+        <span class="row-lbl">📁 Cartelle e documenti</span>
+        <span style="color:var(--sage-d);font-size:15px;padding-right:16px;">Apri ›</span>
+      </div>
+    </div>
+
     <!-- SKINCARE -->
     <div class="group-label">Schede per il paziente</div>
     <div class="list">
@@ -944,6 +953,23 @@ input,textarea,button,select{font-family:var(--fnt);font-weight:700;}
 
     <div style="height:40px;"></div>
   </div>
+</div>
+
+<!-- ══ APP CARTELLE E DOCUMENTI ══ -->
+<div id="app-cartelle" style="display:none;">
+  <div class="hdr" style="background:rgba(175,170,160,.85);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:0.5px solid rgba(142,138,130,.3);">
+    <div class="hdr-top">
+      <button class="hdr-back" onclick="cartelleBack()">← Indietro</button>
+      <div>
+        <div class="hdr-name" id="cartelle-titolo">Cartelle e Protocolli</div>
+        <div class="hdr-sub">Dr. Simone Caccetta</div>
+      </div>
+    </div>
+  </div>
+  <div style="padding:20px 16px 100px;">
+    <div id="cartelle-content"><div style="text-align:center;padding:40px 0;color:#8E8E93;">Caricamento...</div></div>
+  </div>
+  <input type="file" id="doc-file-input" accept="application/pdf" style="display:none;" onchange="docFileSelected(this)">
 </div>
 
 <!-- ══ MODAL FIRMA ══ -->
@@ -1016,7 +1042,7 @@ function openIntervento(tipo){
 
 function goHome(){
   currentSection='';
-  ['app-est','app-chir','app-docs','app-storico'].forEach(function(id){
+  ['app-est','app-chir','app-docs','app-storico','app-cartelle'].forEach(function(id){
     var el=document.getElementById(id);if(el)el.style.display='none';
   });
   currentInterventoChir='';
@@ -2375,6 +2401,199 @@ function stampaConsenso(key){
 
 // ── SUPABASE ──────────────────────────────────────────────────────────────────
 var SB_URL = 'https://bikfwlnzczbvgzsanfwc.supabase.co';
+var DOC_BUCKET = 'documenti-studio';
+
+// ── CARTELLE E DOCUMENTI (PDF liberi, es. protocolli) ──────────────────────
+var cartellaCorrente = null; // null = vista elenco cartelle, altrimenti nome cartella aperta
+
+function apriCartelle(){
+  document.getElementById('app-docs').style.display='none';
+  document.getElementById('app-cartelle').style.display='block';
+  cartellaCorrente = null;
+  renderCartelle();
+}
+
+function cartelleBack(){
+  if(cartellaCorrente){
+    cartellaCorrente = null;
+    renderCartelle();
+  } else {
+    document.getElementById('app-cartelle').style.display='none';
+    document.getElementById('app-docs').style.display='block';
+  }
+}
+
+async function docListFolders(){
+  try{
+    var res = await fetch(SB_URL + '/storage/v1/object/list/' + DOC_BUCKET, {
+      method: 'POST', headers: sbHeaders(),
+      body: JSON.stringify({ prefix: '', limit: 1000, sortBy: {column:'name', order:'asc'} })
+    });
+    var items = await res.json();
+    if(!Array.isArray(items)) return [];
+    return items.filter(function(i){ return i.id===null; }).map(function(i){ return i.name; });
+  }catch(e){ return []; }
+}
+
+async function docListFiles(folder){
+  try{
+    var res = await fetch(SB_URL + '/storage/v1/object/list/' + DOC_BUCKET, {
+      method: 'POST', headers: sbHeaders(),
+      body: JSON.stringify({ prefix: folder + '/', limit: 1000, sortBy: {column:'name', order:'asc'} })
+    });
+    var items = await res.json();
+    if(!Array.isArray(items)) return [];
+    return items.filter(function(i){ return i.id!==null && i.name!=='.keep'; }).map(function(i){
+      return {
+        name: i.name,
+        path: folder + '/' + i.name,
+        url: SB_URL + '/storage/v1/object/public/' + DOC_BUCKET + '/' + folder + '/' + i.name
+      };
+    });
+  }catch(e){ return []; }
+}
+
+async function docCreaCartella(nomeGrezzo){
+  var nome = nomeGrezzo.trim().toLowerCase()
+    .replace(/\s+/g,'-')
+    .replace(/[^a-z0-9\-_]/g,'');
+  if(!nome) return false;
+  try{
+    var blob = new Blob([''], {type:'text/plain'});
+    var res = await fetch(SB_URL + '/storage/v1/object/' + DOC_BUCKET + '/' + nome + '/.keep', {
+      method: 'POST',
+      headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY, 'Content-Type': 'text/plain', 'x-upsert': 'true' },
+      body: blob
+    });
+    return res.ok;
+  }catch(e){ return false; }
+}
+
+async function docCaricaFile(folder, file){
+  try{
+    var nomePulito = file.name.replace(/[^a-zA-Z0-9._\-]/g,'_');
+    var path = folder + '/' + Date.now() + '_' + nomePulito;
+    var res = await fetch(SB_URL + '/storage/v1/object/' + DOC_BUCKET + '/' + path, {
+      method: 'POST',
+      headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY, 'Content-Type': file.type||'application/pdf', 'x-upsert': 'true' },
+      body: file
+    });
+    return res.ok;
+  }catch(e){ return false; }
+}
+
+async function docEliminaFile(path){
+  try{
+    await fetch(SB_URL + '/storage/v1/object/' + DOC_BUCKET, {
+      method: 'DELETE', headers: sbHeaders(), body: JSON.stringify({ prefixes: [path] })
+    });
+    return true;
+  }catch(e){ return false; }
+}
+
+async function docEliminaCartella(folder){
+  try{
+    var files = await docListFiles(folder);
+    var paths = files.map(function(f){ return f.path; });
+    paths.push(folder + '/.keep');
+    await fetch(SB_URL + '/storage/v1/object/' + DOC_BUCKET, {
+      method: 'DELETE', headers: sbHeaders(), body: JSON.stringify({ prefixes: paths })
+    });
+    return true;
+  }catch(e){ return false; }
+}
+
+async function renderCartelle(){
+  var el = document.getElementById('cartelle-content');
+  el.innerHTML = '<div style="text-align:center;padding:40px 0;color:#8E8E93;">Caricamento...</div>';
+
+  if(!cartellaCorrente){
+    document.getElementById('cartelle-titolo').textContent = 'Cartelle e Protocolli';
+    var folders = await docListFolders();
+    var html = '<div class="list" style="margin-bottom:16px;">';
+    if(!folders.length){
+      html += '<div class="row"><span class="row-lbl" style="color:#8E8E93;">Nessuna cartella ancora</span></div>';
+    }
+    folders.forEach(function(f){
+      html += '<div class="row" style="cursor:pointer;" onclick="apriCartella(\''+encodeURIComponent(f)+'\')">'
+        + '<span class="row-lbl">📁 '+f+'</span>'
+        + '<span style="color:var(--sage-d);font-size:15px;padding-right:16px;">Apri ›</span>'
+        + '</div>';
+    });
+    html += '</div>';
+    html += '<button onclick="promptNuovaCartella()" style="width:100%;height:48px;border-radius:12px;border:0.5px dashed rgba(142,158,154,.5);background:rgba(142,158,154,.08);font-family:inherit;font-weight:700;font-size:14px;color:#5A6B67;cursor:pointer;">+ Nuova cartella</button>';
+    el.innerHTML = html;
+  } else {
+    document.getElementById('cartelle-titolo').textContent = '📁 ' + cartellaCorrente;
+    var files = await docListFiles(cartellaCorrente);
+    var html2 = '<div class="list" style="margin-bottom:16px;">';
+    if(!files.length){
+      html2 += '<div class="row"><span class="row-lbl" style="color:#8E8E93;">Nessun file in questa cartella</span></div>';
+    }
+    files.forEach(function(f){
+      var nomeVis = f.name.replace(/^\d+_/, '');
+      html2 += '<div class="row">'
+        + '<span class="row-lbl" style="cursor:pointer;" onclick="window.open(\''+f.url+'\',\'_blank\')">📄 '+nomeVis+'</span>'
+        + '<button onclick="eliminaDocFile(\''+encodeURIComponent(f.path)+'\')" style="border:none;background:none;color:#C0392B;font-weight:700;font-size:13px;padding:0 16px;cursor:pointer;">Elimina</button>'
+        + '</div>';
+    });
+    html2 += '</div>';
+    html2 += '<button onclick="document.getElementById(\'doc-file-input\').click()" style="width:100%;height:48px;border-radius:12px;border:none;background:var(--sage-d);color:#fff;font-family:inherit;font-weight:700;font-size:14px;cursor:pointer;margin-bottom:10px;">+ Carica PDF</button>';
+    html2 += '<button onclick="eliminaCartellaCorrente()" style="width:100%;height:44px;border-radius:12px;border:0.5px solid rgba(192,57,43,.2);background:rgba(192,57,43,.06);color:#C0392B;font-family:inherit;font-weight:700;font-size:13px;cursor:pointer;">Elimina cartella</button>';
+    el.innerHTML = html2;
+  }
+}
+
+function promptNuovaCartella(){
+  var nome = prompt('Nome della nuova cartella (es. Protocolli):');
+  if(!nome || !nome.trim()) return;
+  showToast('Creazione cartella...');
+  docCreaCartella(nome).then(function(ok){
+    showToast(ok ? 'Cartella creata' : 'Errore nella creazione della cartella');
+    renderCartelle();
+  });
+}
+
+function apriCartella(nomeEnc){
+  cartellaCorrente = decodeURIComponent(nomeEnc);
+  renderCartelle();
+}
+
+function docFileSelected(input){
+  var file = input.files[0];
+  if(!file || !cartellaCorrente) return;
+  if(file.type !== 'application/pdf'){
+    showToast('Puoi caricare solo file PDF');
+    input.value='';
+    return;
+  }
+  showToast('Caricamento PDF...');
+  docCaricaFile(cartellaCorrente, file).then(function(ok){
+    showToast(ok ? 'File caricato' : 'Errore nel caricamento del file');
+    renderCartelle();
+    input.value='';
+  });
+}
+
+function eliminaDocFile(pathEnc){
+  var path = decodeURIComponent(pathEnc);
+  if(!confirm('Eliminare questo file definitivamente?')) return;
+  showToast('Eliminazione...');
+  docEliminaFile(path).then(function(){
+    showToast('File eliminato');
+    renderCartelle();
+  });
+}
+
+function eliminaCartellaCorrente(){
+  if(!confirm('Eliminare la cartella "'+cartellaCorrente+'" e tutti i file al suo interno? Operazione irreversibile.')) return;
+  showToast('Eliminazione cartella...');
+  docEliminaCartella(cartellaCorrente).then(function(){
+    showToast('Cartella eliminata');
+    cartellaCorrente = null;
+    renderCartelle();
+  });
+}
 var SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJpa2Z3bG56Y3pidmd6c2FuZndjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMxNzI5NzgsImV4cCI6MjA5ODc0ODk3OH0.gUiR3uEwbBHN1t_z-ec8d_uDBpiJgLRprf3x3rtd1ok';
 
 function sbHeaders() {
