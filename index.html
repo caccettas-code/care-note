@@ -1913,7 +1913,7 @@ function highlight(text, query){
 
 function cercaSchede(q){
   var query=(q||'').trim().toLowerCase();
-  var schede=getAllSchede();
+  var schede=fonteSchede();
   var filtered=schede.filter(function(s){
     if(storicoFilter==='est'&&s.tipo!=='est')return false;
     if(storicoFilter==='chir'&&s.tipo!=='chir')return false;
@@ -1961,8 +1961,9 @@ function renderSchede(schede, query){
     html+='<div class="scheda-card-name">'+nomeHL+'</div>';
     html+='<div>'+badges+'</div>';
     html+='</div>';
-    html+='<div class="scheda-card-info">'+nSchede+' scheda'+(nSchede===1?'':'e')+' archiviata'+(nSchede===1?'':'e')+'</div>';
+    html+='<div class="scheda-card-info">'+nSchede+' sched'+(nSchede===1?'a':'e')+' archiviat'+(nSchede===1?'a':'e')+'</div>';
     html+='<div class="scheda-card-meta">'+(ultima?'Ultima visita: '+ultima:'')+'</div>';
+    html+='<button data-nome="'+nomeEnc+'" onclick="event.stopPropagation();eliminaPaziente(this.dataset.nome)" style="margin-top:10px;width:100%;height:32px;border-radius:8px;border:0.5px solid rgba(192,57,43,.2);background:rgba(192,57,43,.06);color:#C0392B;font-family:inherit;font-weight:700;font-size:12px;cursor:pointer;">Elimina</button>';
     html+='</div>';
   });
   lista.innerHTML=html;
@@ -1976,11 +1977,39 @@ function setFilter(f){
 }
 
 
-function eliminaScheda(key){
+// Sorgente unica per lo storico: usa i dati già uniti Supabase+locale
+// caricati da aggiornaStorico(); se non ancora disponibili, ripiega sul solo locale.
+function fonteSchede(){
+  return (typeof storicoTutteSchede!=='undefined' && storicoTutteSchede.length) ? storicoTutteSchede : getAllSchede();
+}
+
+async function eliminaScheda(key, sbId){
   if(!confirm('Eliminare questa scheda?'))return;
-  localStorage.removeItem(key);
-  aggiornaStorico();
+  if(key && key.indexOf('sb_')!==0) localStorage.removeItem(key);
+  if(sbId) await sbEliminaScheda(sbId);
   showToast('Scheda eliminata');
+  await aggiornaStorico();
+  if(profiloPazienteCorrente){
+    apriProfilo(encodeURIComponent(profiloPazienteCorrente));
+  }
+}
+
+async function eliminaPaziente(nomeEnc){
+  var nome=decodeURIComponent(nomeEnc);
+  var schede=fonteSchede().filter(function(s){return s.nomeCompleto===nome;});
+  if(!schede.length){showToast('Nessuna scheda trovata per questo paziente');return;}
+  if(!confirm('Eliminare tutte le '+schede.length+' schede di '+nome+'? L\'operazione è irreversibile.'))return;
+  for(var i=0;i<schede.length;i++){
+    var s=schede[i];
+    if(s.key && s.key.indexOf('sb_')!==0) localStorage.removeItem(s.key);
+    if(s.sbId) await sbEliminaScheda(s.sbId);
+  }
+  showToast('Schede di '+nome+' eliminate');
+  if(profiloPazienteCorrente===nome){
+    tornaStorico();
+  } else {
+    await aggiornaStorico();
+  }
 }
 
 
@@ -1990,8 +2019,8 @@ function apriProfilo(nomeEnc){
   var nome=decodeURIComponent(nomeEnc);
   profiloPazienteCorrente=nome;
   document.getElementById('profilo-nome').textContent=nome;
-  var schede=getAllSchede().filter(function(s){return s.nomeCompleto===nome;});
-  document.getElementById('profilo-sub').textContent=schede.length+' scheda'+(schede.length===1?'':'e')+' archiviata'+(schede.length===1?'':'e');
+  var schede=fonteSchede().filter(function(s){return s.nomeCompleto===nome;});
+  document.getElementById('profilo-sub').textContent=schede.length+' sched'+(schede.length===1?'a':'e')+' archiviat'+(schede.length===1?'a':'e');
   var container=document.getElementById('profilo-schede');
   if(!schede.length){
     container.innerHTML='<div style="color:#8E8E93;font-size:14px;font-weight:400;text-align:center;padding:20px;">Nessuna scheda</div>';
@@ -2004,13 +2033,13 @@ function apriProfilo(nomeEnc){
       if(s.intervento)info.push(s.intervento);
       var data=s.dataTratt||'';
       var saved=s.ts?new Date(s.ts).toLocaleDateString('it-IT'):'';
-      return '<div class="scheda-card">'
-        +'<div onclick="apriScheda(\''+s.key+'\',\''+s.tipo+'\')" style="cursor:pointer;">'
+      return '<div class="scheda-card" data-key="'+s.key+'" data-sbid="'+(s.sbId||'')+'">'
+        +'<div onclick="apriScheda(this.closest(\'.scheda-card\').dataset.key,\''+s.tipo+'\')" style="cursor:pointer;">'
         +'<div class="scheda-card-header"><div class="scheda-card-name" style="font-size:14px;">'+(data||saved)+'</div>'+badge+'</div>'
         +(info.length?'<div class="scheda-card-info">'+info.join(' · ')+'</div>':'')
         +'<div class="scheda-card-meta">'+(saved?'Salvato: '+saved:'')+'</div>'
         +'</div>'
-        +'<button onclick="eliminaScheda(\''+s.key+'\')" style="margin-top:8px;width:100%;height:34px;border-radius:8px;border:0.5px solid rgba(192,57,43,.2);background:rgba(192,57,43,.06);color:#C0392B;font-family:inherit;font-weight:700;font-size:12px;cursor:pointer;">Elimina</button>'
+        +'<button onclick="var c=this.closest(\'.scheda-card\');eliminaScheda(c.dataset.key,c.dataset.sbid||null)" style="margin-top:8px;width:100%;height:34px;border-radius:8px;border:0.5px solid rgba(192,57,43,.2);background:rgba(192,57,43,.06);color:#C0392B;font-family:inherit;font-weight:700;font-size:12px;cursor:pointer;">Elimina</button>'
         +'</div>';
     }).join('');
   }
@@ -2053,11 +2082,6 @@ function nuovaSchedaPaziente(tipo){
     openSection('chir');
     setTimeout(function(){openIntervento('mammella');switchTabChir(0);},100);
   }
-}
-
-function aggiornaStorico(){
-  document.getElementById('storico-search').value='';
-  cercaSchede('');
 }
 
 function apriScheda(key, tipo){
@@ -2377,6 +2401,17 @@ async function sbGetSchede() {
   } catch(e) { return []; }
 }
 
+async function sbEliminaScheda(id) {
+  if(!id) return false;
+  try {
+    await fetch(SB_URL + '/rest/v1/schede?id=eq.' + id, {
+      method: 'DELETE',
+      headers: sbHeaders()
+    });
+    return true;
+  } catch(e) { console.error('Supabase delete error:', e); return false; }
+}
+
 // Raccogli tutti i dati del form corrente
 function raccogliDatiEst() {
   var data = {tipo:'est'};
@@ -2476,6 +2511,8 @@ async function salvaAltro() {
 
 // ── STORICO: carica da Supabase ───────────────────────────────────────────────
 async function aggiornaStorico() {
+  var searchBox=document.getElementById('storico-search');
+  if(searchBox) searchBox.value='';
   document.getElementById('storico-stats').textContent='Caricamento...';
   document.getElementById('storico-lista').innerHTML='';
   
