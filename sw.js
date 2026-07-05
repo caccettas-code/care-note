@@ -1,4 +1,4 @@
-const CACHE_NAME = 'schede-cliniche-v3';
+const CACHE_NAME = 'schede-cliniche-v4';
 const ASSETS = [
   '/scheda-estetica/',
   '/scheda-estetica/index.html',

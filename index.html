@@ -120,6 +120,10 @@ input,textarea,button,select{font-family:var(--fnt);font-weight:700;}
 
 /* ── FOOTER ── */
 .footer{position:fixed;bottom:0;left:0;right:0;padding:10px 16px calc(10px + env(safe-area-inset-bottom));background:rgba(242,242,247,.92);backdrop-filter:blur(24px);border-top:0.5px solid var(--sep);display:flex;gap:10px;}
+.tab-nav-btn{position:fixed;bottom:calc(82px + env(safe-area-inset-bottom));width:46px;height:46px;border-radius:50%;background:rgba(28,28,30,.82);color:#fff;border:none;font-size:22px;font-weight:700;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:60;box-shadow:0 2px 10px rgba(0,0,0,.28);line-height:1;padding:0 0 2px;}
+.tab-nav-prev{left:14px;}
+.tab-nav-next{right:14px;}
+.tab-nav-btn[hidden]{display:none;}
 .fbtn{flex:1;height:50px;border-radius:13px;border:none;font-family:var(--fnt);font-weight:700;font-size:15px;cursor:pointer;}
 .fbtn-sec{background:rgba(255,255,255,.45);color:#1C1C1E;backdrop-filter:blur(8px);border:0.5px solid rgba(142,158,154,.3);}
 .fbtn-red{background:rgba(110,132,128,.75);color:#1C1C1E;backdrop-filter:blur(8px);border:1px solid rgba(110,132,128,.3);}
@@ -390,6 +394,9 @@ input,textarea,button,select{font-family:var(--fnt);font-weight:700;}
     <div style="height:8px;"></div>
   </div>
 
+  <button class="tab-nav-btn tab-nav-prev" id="nav-prev-est" onclick="navTabEst(-1)" aria-label="Pagina precedente">‹</button>
+  <button class="tab-nav-btn tab-nav-next" id="nav-next-est" onclick="navTabEst(1)" aria-label="Pagina successiva">›</button>
+
   <div class="footer">
     <button class="fbtn fbtn-sec" onclick="newSchedaEst()" style="flex:0.7;font-size:13px;">+ Nuova</button>
     <button class="fbtn fbtn-red" onclick="salvaEst()">Salva</button>
@@ -655,6 +662,9 @@ input,textarea,button,select{font-family:var(--fnt);font-weight:700;}
       <div style="height:8px;"></div>
     </div>
 
+    <button class="tab-nav-btn tab-nav-prev" id="nav-prev-chir" onclick="navTabChir(-1)" aria-label="Pagina precedente">‹</button>
+    <button class="tab-nav-btn tab-nav-next" id="nav-next-chir" onclick="navTabChir(1)" aria-label="Pagina successiva">›</button>
+
     <div class="footer">
       <button class="fbtn fbtn-sec" onclick="newSchedaChir()" style="flex:0.7;font-size:13px;">+ Nuova</button>
       <button class="fbtn fbtn-blue" onclick="salvaChir()">Salva</button>
@@ -799,6 +809,9 @@ input,textarea,button,select{font-family:var(--fnt);font-weight:700;}
     </div>
     <div style="height:8px;"></div>
   </div>
+
+  <button class="tab-nav-btn tab-nav-prev" id="nav-prev-chira" onclick="navTabChirA(-1)" aria-label="Pagina precedente">‹</button>
+  <button class="tab-nav-btn tab-nav-next" id="nav-next-chira" onclick="navTabChirA(1)" aria-label="Pagina successiva">›</button>
 
   <div class="footer">
     <button class="fbtn fbtn-sec" onclick="newSchedaAltro()" style="flex:0.7;font-size:13px;">+ Nuova</button>
@@ -1090,6 +1103,12 @@ function restoreYn(data){
 }
 
 // ── TABS ─────────────────────────────────────────────────────────────────────
+function aggiornaNavTab(prefix, i, count){
+  var prevBtn=document.getElementById('nav-prev-'+prefix);
+  var nextBtn=document.getElementById('nav-next-'+prefix);
+  if(prevBtn) prevBtn.hidden = (i<=0);
+  if(nextBtn) nextBtn.hidden = (i>=count-1);
+}
 function switchTabEst(i){
   currentTabEst=i;
   document.querySelectorAll('.tab-est').forEach(function(t,j){t.classList.toggle('active',i===j);});
@@ -1099,6 +1118,7 @@ function switchTabEst(i){
     if(el)el.style.display=(i===j)?'block':'none';
   });
   if(i===4)setTimeout(initAllFirme,50);
+  aggiornaNavTab('est', i, pages.length);
 }
 function switchTabChir(i){
   currentTabChir=i;
@@ -1108,17 +1128,26 @@ function switchTabChir(i){
     var el=document.getElementById(id);
     if(el)el.style.display=(i===j)?'block':'none';
   });
+  aggiornaNavTab('chir', i, pages.length);
 }
 function switchTabChirA(i){
   currentTabChirA=i;
   document.querySelectorAll('.tab-chir-a').forEach(function(t,j){t.classList.toggle('active',i===j);});
-  document.querySelectorAll('#chir-altro .page').forEach(function(p,j){p.style.display=(i===j)?'block':'none';});
+  var pagineChirA=document.querySelectorAll('#chir-altro .page');
+  pagineChirA.forEach(function(p,j){p.style.display=(i===j)?'block':'none';});
+  aggiornaNavTab('chira', i, pagineChirA.length);
 }
+function navTabEst(delta){ switchTabEst(Math.max(0, Math.min(4, currentTabEst+delta))); }
+function navTabChir(delta){ switchTabChir(Math.max(0, Math.min(6, currentTabChir+delta))); }
+function navTabChirA(delta){ switchTabChirA(Math.max(0, Math.min(4, currentTabChirA+delta))); }
 ['est-tab0','est-tab1','est-tab2','est-tab-foto','est-tab3'].forEach(function(id,j){
   var el=document.getElementById(id);if(el)el.style.display=j===0?'block':'none';
 });
 document.querySelectorAll('#chir-mammella .page').forEach(function(p,j){p.style.display=j===0?'block':'none';});
 document.querySelectorAll('#chir-altro .page').forEach(function(p,j){p.style.display=j===0?'block':'none';});
+aggiornaNavTab('est', 0, 5);
+aggiornaNavTab('chir', 0, 7);
+aggiornaNavTab('chira', 0, document.querySelectorAll('#chir-altro .page').length);
 
 // ── SCHEDULA ─────────────────────────────────────────────────────────────────
 function schedula(){
@@ -1129,7 +1158,6 @@ function schedula(){
 function clearYn(){document.querySelectorAll('.yn-btn').forEach(function(b){b.style.background='';b.style.borderColor='';b.style.color='';});}
 
 function newSchedaEst(){
-  if(!confirm('Nuova scheda? Quella corrente è già salvata.'))return;
   schedaIdEst='sc_est_'+Date.now();ynState={};currentConsenso=null;sbIdEst=null;
   consensiFirmati=[];
   FIELDS_EST.forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});
@@ -1142,7 +1170,6 @@ function newSchedaEst(){
   goHome();
 }
 function newSchedaChir(){
-  if(!confirm('Nuova scheda? Quella corrente è già salvata.'))return;
   schedaIdChir='sc_chir_'+Date.now();ynState={};currentConsenso=null;sbIdChir=null;
   FIELDS_CHIR.forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});
   clearYn();
@@ -1153,7 +1180,6 @@ function newSchedaChir(){
   goHome();
 }
 function newSchedaAltro(){
-  if(!confirm('Nuova scheda? Quella corrente è già salvata.'))return;
   schedaIdAltro='altro_'+Date.now();ynState={};currentConsenso=null;
   FIELDS_ALTRO.forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});
   clearYn();
@@ -2064,7 +2090,7 @@ function apriProfilo(nomeEnc){
       if(fotos.length){
         fotoStrip='<div style="display:flex;gap:6px;overflow-x:auto;margin-top:8px;padding-bottom:2px;">'
           +fotos.map(function(f){
-            return '<img src="'+f.src+'" title="'+(f.titolo?f.titolo.replace(/"/g,'&quot;'):'')+'" style="width:52px;height:52px;object-fit:cover;border-radius:8px;flex-shrink:0;cursor:pointer;" onclick="event.stopPropagation();window.open(this.src,\'_blank\')">';
+            return '<img src="'+f.src+'" title="'+(f.titolo?f.titolo.replace(/"/g,'&quot;'):'')+'" style="width:52px;height:52px;object-fit:cover;border-radius:8px;flex-shrink:0;cursor:pointer;" onclick="event.stopPropagation();salvaFotoSuDispositivo(this.src)">';
           }).join('')
           +'</div>';
       }
@@ -2566,6 +2592,7 @@ async function salvaEst() {
     await sbAggiornalScheda(sbIdEst, 'est', cognome, nome, dati);
   } else {
     sbIdEst = await sbSalvaScheda('est', cognome, nome, dati);
+    if(!sbIdEst){ try{ sbIdEst = await sbSalvaScheda('est', cognome, nome, dati); }catch(e){} }
   }
   
   // Upload pending photos + raccogli i riferimenti (url o base64) nella scheda
@@ -2580,6 +2607,7 @@ async function salvaEst() {
     if(sbIdEst){
       try{
         var pdfUrlEst = await sbCaricaPDFStorico(sbIdEst, docEst.output('blob'), fileNamePdfEst);
+        if(!pdfUrlEst) pdfUrlEst = await sbCaricaPDFStorico(sbIdEst, docEst.output('blob'), fileNamePdfEst);
         if(pdfUrlEst) dati.pdfUrl = pdfUrlEst;
       }catch(e){}
     }
@@ -2592,6 +2620,12 @@ async function salvaEst() {
   
   // Ri-sincronizza su Supabase cosi anche li la scheda include dati.foto e dati.pdfUrl
   if(sbIdEst) await sbAggiornalScheda(sbIdEst, 'est', cognome, nome, dati);
+  
+  if(!sbIdEst){
+    showToast('Scheda salvata solo in locale: Supabase non raggiungibile. Il PDF nello storico non sarà disponibile finché non risalvi con connessione attiva.');
+  } else if(!dati.pdfUrl){
+    showToast('Scheda salvata, ma il PDF non è stato archiviato online. Prova a salvare di nuovo tra poco.');
+  }
   
   var el=document.getElementById('dot-est');if(el)el.style.background='#30D158';
   var se=document.getElementById('saved-est');if(se)se.textContent='Salvato alle '+new Date().getHours()+':'+String(new Date().getMinutes()).padStart(2,'0');
@@ -2617,6 +2651,7 @@ async function salvaChir() {
     await sbAggiornalScheda(sbIdChir, 'chir', cognome, nome, dati);
   } else {
     sbIdChir = await sbSalvaScheda('chir', cognome, nome, dati);
+    if(!sbIdChir){ try{ sbIdChir = await sbSalvaScheda('chir', cognome, nome, dati); }catch(e){} }
   }
   
   // Upload pending photos + raccogli i riferimenti (url o base64) nella scheda
@@ -2631,6 +2666,7 @@ async function salvaChir() {
     if(sbIdChir){
       try{
         var pdfUrlChir = await sbCaricaPDFStorico(sbIdChir, docChir.output('blob'), fileNamePdfChir);
+        if(!pdfUrlChir) pdfUrlChir = await sbCaricaPDFStorico(sbIdChir, docChir.output('blob'), fileNamePdfChir);
         if(pdfUrlChir) dati.pdfUrl = pdfUrlChir;
       }catch(e){}
     }
@@ -2643,6 +2679,12 @@ async function salvaChir() {
   
   // Ri-sincronizza su Supabase cosi anche li la scheda include dati.foto e dati.pdfUrl
   if(sbIdChir) await sbAggiornalScheda(sbIdChir, 'chir', cognome, nome, dati);
+  
+  if(!sbIdChir){
+    showToast('Scheda salvata solo in locale: Supabase non raggiungibile. Il PDF nello storico non sarà disponibile finché non risalvi con connessione attiva.');
+  } else if(!dati.pdfUrl){
+    showToast('Scheda salvata, ma il PDF non è stato archiviato online. Prova a salvare di nuovo tra poco.');
+  }
   
   var elc=document.getElementById('dot-chir');if(elc)elc.style.background='#30D158';
   var sc=document.getElementById('saved-chir');if(sc)sc.textContent='Salvato alle '+new Date().getHours()+':'+String(new Date().getMinutes()).padStart(2,'0');
@@ -2769,6 +2811,19 @@ async function caricaFotoScheda(sbId, sezione) {
 
 
 // ── FOTO GALLERY ──────────────────────────────────────────────────────────────
+async function salvaFotoSuDispositivo(src, nomeFile){
+  try{
+    var resp = await fetch(src);
+    var blob = await resp.blob();
+    var file = new File([blob], (nomeFile||'foto')+'.jpg', {type: blob.type||'image/jpeg'});
+    if(navigator.canShare && navigator.canShare({files:[file]})){
+      await navigator.share({files:[file]});
+      return;
+    }
+  }catch(e){}
+  window.open(src, '_blank');
+}
+
 var fotoData = {est: [], chir: [], profilo: []};
 
 // Legge il file rispettando l'orientamento EXIF (risolve le foto scattate che
@@ -2810,7 +2865,7 @@ async function processFotoFile(file, sezione, gallery){
   wrap.innerHTML =
     '<input class="foto-thumb-title-input" type="text" placeholder="Aggiungi titolo..." maxlength="80">'
     +'<div class="foto-thumb-inner">'
-    +'<img class="foto-thumb-img" src="'+src+'">'
+    +'<img class="foto-thumb-img" src="'+src+'" onclick="salvaFotoSuDispositivo(this.src)" style="cursor:pointer;">'
     +'<button class="foto-thumb-delete" onclick="eliminaFoto(\''+fotoId+'\',\''+sezione+'\')">✕</button>'
     +'</div>';
   gallery.appendChild(wrap);
@@ -2893,7 +2948,7 @@ function clearFotoGallery(sezione){
 
 if('serviceWorker' in navigator){
   window.addEventListener('load', function(){
-    navigator.serviceWorker.register('/scheda-estetica/sw.js?v=3')
+    navigator.serviceWorker.register('/scheda-estetica/sw.js?v=4')
       .then(function(reg){ console.log('SW registered'); })
       .catch(function(err){ console.log('SW error:', err); });
   });
