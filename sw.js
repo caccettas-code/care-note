@@ -1,7 +1,7 @@
-const CACHE_NAME = 'schede-cliniche-v4';
+const CACHE_NAME = 'schede-cliniche-v5';
 const ASSETS = [
-  '/scheda-estetica/',
-  '/scheda-estetica/index.html',
+  '/care-note/',
+  '/care-note/index.html',
   'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js'
 ];
 

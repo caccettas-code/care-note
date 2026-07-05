@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Schede Cliniche">
 <meta name="theme-color" content="#BEC6C3">
-<link rel="manifest" href="/scheda-estetica/manifest.json">
+<link rel="manifest" href="/care-note/manifest.json">
 <link rel="apple-touch-icon" href="icon-192.png">
 <title>Dr. Simone Caccetta</title>
 <style>
@@ -3216,7 +3216,7 @@ function clearFotoGallery(sezione){
 
 if('serviceWorker' in navigator){
   window.addEventListener('load', function(){
-    navigator.serviceWorker.register('/scheda-estetica/sw.js?v=4')
+    navigator.serviceWorker.register('/care-note/sw.js?v=5')
       .then(function(reg){ console.log('SW registered'); })
       .catch(function(err){ console.log('SW error:', err); });
   });
