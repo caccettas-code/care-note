@@ -2478,15 +2478,52 @@ async function sbGetSchede() {
   } catch(e) { return []; }
 }
 
+async function sbListaFileScheda(schedaId){
+  try{
+    var res = await fetch(SB_URL + '/storage/v1/object/list/foto-pazienti', {
+      method: 'POST',
+      headers: sbHeaders(),
+      body: JSON.stringify({ prefix: schedaId + '/', limit: 1000 })
+    });
+    var items = await res.json();
+    if(!Array.isArray(items)) return [];
+    return items.map(function(f){ return schedaId + '/' + f.name; });
+  }catch(e){ return []; }
+}
+
+async function sbEliminaFileScheda(schedaId){
+  if(!schedaId) return;
+  try{
+    var paths = await sbListaFileScheda(schedaId);
+    if(paths.length){
+      await fetch(SB_URL + '/storage/v1/object/foto-pazienti', {
+        method: 'DELETE',
+        headers: sbHeaders(),
+        body: JSON.stringify({ prefixes: paths })
+      });
+    }
+  }catch(e){ console.error('Errore eliminazione file storage:', e); }
+  try{
+    await fetch(SB_URL + '/rest/v1/foto?scheda_id=eq.' + schedaId, {
+      method: 'DELETE',
+      headers: sbHeaders()
+    });
+  }catch(e){ console.error('Errore eliminazione righe foto:', e); }
+}
+
 async function sbEliminaScheda(id) {
   if(!id) return false;
   try {
+    await sbEliminaFileScheda(id);
     await fetch(SB_URL + '/rest/v1/schede?id=eq.' + id, {
       method: 'DELETE',
       headers: sbHeaders()
     });
     return true;
-  } catch(e) { console.error('Supabase delete error:', e); return false; }
+  } catch(e) {
+    console.error('Supabase delete error:', e);
+    return false;
+  }
 }
 
 // Raccogli tutti i dati del form corrente
