@@ -2007,14 +2007,19 @@ function renderSchede(schede, query){
     var nomeEnc=encodeURIComponent(nome);
     var nomeHL=highlight(nome,query);
     var nSchede=p.schede.length;
-    html+='<div class="scheda-card" style="cursor:pointer;" onclick="apriProfilo(decodeURIComponent(this.dataset.nome))" data-nome="'+nomeEnc+'">';
+    html+='<div class="scheda-card" data-nome="'+nomeEnc+'">';
     html+='<div class="scheda-card-header">';
     html+='<div class="scheda-card-name">'+nomeHL+'</div>';
     html+='<div>'+badges+'</div>';
     html+='</div>';
     html+='<div class="scheda-card-info">'+nSchede+' sched'+(nSchede===1?'a':'e')+' archiviat'+(nSchede===1?'a':'e')+'</div>';
     html+='<div class="scheda-card-meta">'+(ultima?'Ultima visita: '+ultima:'')+'</div>';
-    html+='<button data-nome="'+nomeEnc+'" onclick="event.stopPropagation();eliminaPaziente(this.dataset.nome)" style="margin-top:10px;width:100%;height:32px;border-radius:8px;border:0.5px solid rgba(192,57,43,.2);background:rgba(192,57,43,.06);color:#C0392B;font-family:inherit;font-weight:700;font-size:12px;cursor:pointer;">Elimina</button>';
+    html+='<div style="display:flex;justify-content:flex-end;margin-top:10px;">';
+    html+='<button data-nome="'+nomeEnc+'" onclick="apriProfilo(this.dataset.nome)" style="height:32px;padding:0 18px;border-radius:8px;border:0.5px solid rgba(142,158,154,.3);background:rgba(142,158,154,.15);font-family:inherit;font-weight:700;font-size:12px;color:#1C1C1E;cursor:pointer;">Seleziona</button>';
+    html+='</div>';
+    html+='<div style="display:flex;justify-content:flex-end;margin-top:6px;">';
+    html+='<button data-nome="'+nomeEnc+'" onclick="eliminaPaziente(this.dataset.nome)" style="height:24px;padding:0 12px;border-radius:7px;border:0.5px solid rgba(192,57,43,.2);background:rgba(192,57,43,.06);color:#C0392B;font-family:inherit;font-weight:700;font-size:10.5px;cursor:pointer;">Elimina</button>';
+    html+='</div>';
     html+='</div>';
   });
   lista.innerHTML=html;
@@ -2098,13 +2103,18 @@ function apriProfilo(nomeEnc){
         ? "apriPdfStorico('"+encodeURIComponent(pdfUrl)+"')"
         : "showToast('PDF non disponibile per questa scheda (salvata prima dell\\'aggiornamento)')";
       return '<div class="scheda-card" data-key="'+s.key+'" data-sbid="'+(s.sbId||'')+'">'
-        +'<div onclick="'+apriAzione+'" style="cursor:pointer;">'
+        +'<div>'
         +'<div class="scheda-card-header"><div class="scheda-card-name" style="font-size:14px;">'+(data||saved)+'</div>'+badge+'</div>'
         +(info.length?'<div class="scheda-card-info">'+info.join(' · ')+'</div>':'')
-        +'<div class="scheda-card-meta">'+(saved?'Salvato: '+saved:'')+(pdfUrl?' · <span style="color:#8E9E9A;font-weight:700;">Tocca per aprire il PDF</span>':'')+'</div>'
+        +'<div class="scheda-card-meta">'+(saved?'Salvato: '+saved:'')+'</div>'
         +fotoStrip
         +'</div>'
-        +'<button onclick="var c=this.closest(\'.scheda-card\');eliminaScheda(c.dataset.key,c.dataset.sbid||null)" style="margin-top:8px;width:100%;height:34px;border-radius:8px;border:0.5px solid rgba(192,57,43,.2);background:rgba(192,57,43,.06);color:#C0392B;font-family:inherit;font-weight:700;font-size:12px;cursor:pointer;">Elimina</button>'
+        +'<div style="display:flex;justify-content:flex-end;margin-top:10px;">'
+        +'<button onclick="'+apriAzione+'" style="height:32px;padding:0 18px;border-radius:8px;border:0.5px solid rgba(142,158,154,.3);background:rgba(142,158,154,.15);font-family:inherit;font-weight:700;font-size:12px;color:#1C1C1E;cursor:pointer;">Seleziona</button>'
+        +'</div>'
+        +'<div style="display:flex;justify-content:flex-end;margin-top:6px;">'
+        +'<button onclick="var c=this.closest(\'.scheda-card\');eliminaScheda(c.dataset.key,c.dataset.sbid||null)" style="height:24px;padding:0 12px;border-radius:7px;border:0.5px solid rgba(192,57,43,.2);background:rgba(192,57,43,.06);color:#C0392B;font-family:inherit;font-weight:700;font-size:10.5px;cursor:pointer;">Elimina</button>'
+        +'</div>'
         +'</div>';
     }).join('');
   }
@@ -2587,49 +2597,61 @@ async function salvaEst() {
   dati.ts = new Date().toISOString();
   dati.tipo = 'est';
   
-  // Save to Supabase (prima, cosi le foto hanno uno schedaId a cui agganciarsi)
-  if(sbIdEst) {
-    await sbAggiornalScheda(sbIdEst, 'est', cognome, nome, dati);
-  } else {
-    sbIdEst = await sbSalvaScheda('est', cognome, nome, dati);
-    if(!sbIdEst){ try{ sbIdEst = await sbSalvaScheda('est', cognome, nome, dati); }catch(e){} }
-  }
-  
-  // Upload pending photos + raccogli i riferimenti (url o base64) nella scheda
-  if(sbIdEst) await uploadPendingFotos(sbIdEst, 'est');
-  dati.foto = await finalizzaFotoPerSalvataggio('est', sbIdEst);
-  
-  // Genera il PDF definitivo (con le foto già corrette) UNA volta sola:
-  // lo archivia come copia scaricabile nello storico e lo scarica in locale
-  var docEst = costruisciPDFEst();
+  // Genera e scarica il PDF SUBITO, prima di qualunque chiamata di rete:
+  // cosi il download locale avviene sempre, anche se Supabase da problemi.
+  var docEst = null;
   var fileNamePdfEst = 'Estetica_'+(cognome||'Paziente').replace(/\s+/g,'_')+'_'+new Date().toISOString().split('T')[0]+'.pdf';
-  if(docEst){
-    if(sbIdEst){
+  try{
+    docEst = costruisciPDFEst();
+    if(docEst) docEst.save(fileNamePdfEst);
+  }catch(e){ console.error('Errore generazione/download PDF:', e); }
+  
+  var cloudOk = false;
+  var pdfArchiviato = false;
+  try{
+    // Save to Supabase (prima, cosi le foto hanno uno schedaId a cui agganciarsi)
+    if(sbIdEst) {
+      await sbAggiornalScheda(sbIdEst, 'est', cognome, nome, dati);
+      cloudOk = true;
+    } else {
+      sbIdEst = await sbSalvaScheda('est', cognome, nome, dati);
+      if(!sbIdEst){ try{ sbIdEst = await sbSalvaScheda('est', cognome, nome, dati); }catch(e){} }
+      cloudOk = !!sbIdEst;
+    }
+    
+    // Upload pending photos + raccogli i riferimenti (url o base64) nella scheda
+    if(sbIdEst) await uploadPendingFotos(sbIdEst, 'est');
+    dati.foto = await finalizzaFotoPerSalvataggio('est', sbIdEst);
+    
+    // Archivia il PDF gia generato su Supabase Storage
+    if(docEst && sbIdEst){
       try{
         var pdfUrlEst = await sbCaricaPDFStorico(sbIdEst, docEst.output('blob'), fileNamePdfEst);
         if(!pdfUrlEst) pdfUrlEst = await sbCaricaPDFStorico(sbIdEst, docEst.output('blob'), fileNamePdfEst);
-        if(pdfUrlEst) dati.pdfUrl = pdfUrlEst;
-      }catch(e){}
+        if(pdfUrlEst){ dati.pdfUrl = pdfUrlEst; pdfArchiviato = true; }
+      }catch(e){ console.error('Errore upload PDF su storage:', e); }
     }
-    try{ docEst.save(fileNamePdfEst); }catch(e){}
+    
+    // Ri-sincronizza su Supabase cosi anche li la scheda include dati.foto e dati.pdfUrl
+    if(sbIdEst) await sbAggiornalScheda(sbIdEst, 'est', cognome, nome, dati);
+  }catch(e){
+    console.error('Errore salvataggio cloud:', e);
   }
   
-  // Save to localStorage (ora con i riferimenti foto e il link al PDF inclusi)
+  // Save to localStorage (sempre, indipendentemente da eventuali errori cloud sopra)
   localStorage.setItem(schedaIdEst, JSON.stringify(dati));
   localStorage.setItem('sc_last_est', schedaIdEst);
   
-  // Ri-sincronizza su Supabase cosi anche li la scheda include dati.foto e dati.pdfUrl
-  if(sbIdEst) await sbAggiornalScheda(sbIdEst, 'est', cognome, nome, dati);
-  
-  if(!sbIdEst){
+  if(!cloudOk){
     showToast('Scheda salvata solo in locale: Supabase non raggiungibile. Il PDF nello storico non sarà disponibile finché non risalvi con connessione attiva.');
-  } else if(!dati.pdfUrl){
+  } else if(!pdfArchiviato){
     showToast('Scheda salvata, ma il PDF non è stato archiviato online. Prova a salvare di nuovo tra poco.');
+  } else {
+    showToast('Scheda e PDF salvati!');
   }
   
   var el=document.getElementById('dot-est');if(el)el.style.background='#30D158';
   var se=document.getElementById('saved-est');if(se)se.textContent='Salvato alle '+new Date().getHours()+':'+String(new Date().getMinutes()).padStart(2,'0');
-  showToast('Scheda e PDF salvati!');
 }
 
 async function salvaChir() {
@@ -2646,49 +2668,61 @@ async function salvaChir() {
   dati.ts = new Date().toISOString();
   dati.tipo = 'chir';
   
-  // Save to Supabase (prima, cosi le foto hanno uno schedaId a cui agganciarsi)
-  if(sbIdChir) {
-    await sbAggiornalScheda(sbIdChir, 'chir', cognome, nome, dati);
-  } else {
-    sbIdChir = await sbSalvaScheda('chir', cognome, nome, dati);
-    if(!sbIdChir){ try{ sbIdChir = await sbSalvaScheda('chir', cognome, nome, dati); }catch(e){} }
-  }
-  
-  // Upload pending photos + raccogli i riferimenti (url o base64) nella scheda
-  if(sbIdChir) await uploadPendingFotos(sbIdChir, 'chir');
-  dati.foto = await finalizzaFotoPerSalvataggio('chir', sbIdChir);
-  
-  // Genera il PDF definitivo (con le foto già corrette) UNA volta sola:
-  // lo archivia come copia scaricabile nello storico e lo scarica in locale
-  var docChir = costruisciPDFChir();
+  // Genera e scarica il PDF SUBITO, prima di qualunque chiamata di rete:
+  // cosi il download locale avviene sempre, anche se Supabase da problemi.
+  var docChir = null;
   var fileNamePdfChir = 'Mammella_'+(cognome||'Paziente').replace(/\s+/g,'_')+'_'+new Date().toISOString().split('T')[0]+'.pdf';
-  if(docChir){
-    if(sbIdChir){
+  try{
+    docChir = costruisciPDFChir();
+    if(docChir) docChir.save(fileNamePdfChir);
+  }catch(e){ console.error('Errore generazione/download PDF:', e); }
+  
+  var cloudOk = false;
+  var pdfArchiviato = false;
+  try{
+    // Save to Supabase (prima, cosi le foto hanno uno schedaId a cui agganciarsi)
+    if(sbIdChir) {
+      await sbAggiornalScheda(sbIdChir, 'chir', cognome, nome, dati);
+      cloudOk = true;
+    } else {
+      sbIdChir = await sbSalvaScheda('chir', cognome, nome, dati);
+      if(!sbIdChir){ try{ sbIdChir = await sbSalvaScheda('chir', cognome, nome, dati); }catch(e){} }
+      cloudOk = !!sbIdChir;
+    }
+    
+    // Upload pending photos + raccogli i riferimenti (url o base64) nella scheda
+    if(sbIdChir) await uploadPendingFotos(sbIdChir, 'chir');
+    dati.foto = await finalizzaFotoPerSalvataggio('chir', sbIdChir);
+    
+    // Archivia il PDF gia generato su Supabase Storage
+    if(docChir && sbIdChir){
       try{
         var pdfUrlChir = await sbCaricaPDFStorico(sbIdChir, docChir.output('blob'), fileNamePdfChir);
         if(!pdfUrlChir) pdfUrlChir = await sbCaricaPDFStorico(sbIdChir, docChir.output('blob'), fileNamePdfChir);
-        if(pdfUrlChir) dati.pdfUrl = pdfUrlChir;
-      }catch(e){}
+        if(pdfUrlChir){ dati.pdfUrl = pdfUrlChir; pdfArchiviato = true; }
+      }catch(e){ console.error('Errore upload PDF su storage:', e); }
     }
-    try{ docChir.save(fileNamePdfChir); }catch(e){}
+    
+    // Ri-sincronizza su Supabase cosi anche li la scheda include dati.foto e dati.pdfUrl
+    if(sbIdChir) await sbAggiornalScheda(sbIdChir, 'chir', cognome, nome, dati);
+  }catch(e){
+    console.error('Errore salvataggio cloud:', e);
   }
   
-  // Save to localStorage (ora con i riferimenti foto e il link al PDF inclusi)
+  // Save to localStorage (sempre, indipendentemente da eventuali errori cloud sopra)
   localStorage.setItem(schedaIdChir, JSON.stringify(dati));
   localStorage.setItem('sc_last_chir', schedaIdChir);
   
-  // Ri-sincronizza su Supabase cosi anche li la scheda include dati.foto e dati.pdfUrl
-  if(sbIdChir) await sbAggiornalScheda(sbIdChir, 'chir', cognome, nome, dati);
-  
-  if(!sbIdChir){
+  if(!cloudOk){
     showToast('Scheda salvata solo in locale: Supabase non raggiungibile. Il PDF nello storico non sarà disponibile finché non risalvi con connessione attiva.');
-  } else if(!dati.pdfUrl){
+  } else if(!pdfArchiviato){
     showToast('Scheda salvata, ma il PDF non è stato archiviato online. Prova a salvare di nuovo tra poco.');
+  } else {
+    showToast('Scheda e PDF salvati!');
   }
   
   var elc=document.getElementById('dot-chir');if(elc)elc.style.background='#30D158';
   var sc=document.getElementById('saved-chir');if(sc)sc.textContent='Salvato alle '+new Date().getHours()+':'+String(new Date().getMinutes()).padStart(2,'0');
-  showToast('Scheda e PDF salvati!');
 }
 
 async function salvaAltro() {
