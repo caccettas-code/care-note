@@ -57,10 +57,11 @@ input,textarea,button,select{font-family:var(--fnt);font-weight:700;}
 /* ── TABS ── */
 .tabs-est{background:rgba(238,241,240,.95);backdrop-filter:blur(20px);border-bottom:0.5px solid rgba(142,158,154,.2);position:sticky;top:80px;z-index:99;padding:0 16px;}
 .tabs-chir{background:rgba(238,241,240,.95);backdrop-filter:blur(20px);border-bottom:0.5px solid rgba(142,158,154,.2);position:sticky;top:80px;z-index:99;padding:0 16px;}
-.tabs-inner{display:flex;}
-.tab-est{flex:1;padding:10px 2px 9px;text-align:center;font-size:12px;color:var(--txt3);border:none;background:none;border-bottom:2.5px solid transparent;cursor:pointer;font-weight:700;}
+.tabs-inner{display:flex;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
+.tabs-inner::-webkit-scrollbar{display:none;}
+.tab-est{flex:0 0 auto;white-space:nowrap;padding:10px 16px 9px;text-align:center;font-size:13px;color:var(--txt3);border:none;background:none;border-bottom:2.5px solid transparent;cursor:pointer;font-weight:700;}
 .tab-est.active{color:var(--sage-d);border-bottom-color:var(--sage-d);}
-.tab-chir{flex:1;padding:10px 2px 9px;text-align:center;font-size:12px;color:var(--txt3);border:none;background:none;border-bottom:2.5px solid transparent;cursor:pointer;font-weight:700;}
+.tab-chir{flex:0 0 auto;white-space:nowrap;padding:10px 16px 9px;text-align:center;font-size:13px;color:var(--txt3);border:none;background:none;border-bottom:2.5px solid transparent;cursor:pointer;font-weight:700;}
 .tab-chir.active{color:var(--sage-d);border-bottom-color:var(--sage-d);}
 
 .page{display:none;padding:20px 16px 0;}
@@ -687,7 +688,8 @@ input,textarea,button,select{font-family:var(--fnt);font-weight:700;}
     <button class="tab-chir" onclick="switchTabChirA(1)">Anamnesi</button>
     <button class="tab-chir" onclick="switchTabChirA(2)">Esame</button>
     <button class="tab-chir" onclick="switchTabChirA(3)">Piano Op.</button>
-    <button class="tab-chir" onclick="switchTabChirA(4)">Consenso</button>
+    <button class="tab-chir" onclick="switchTabChirA(4)">Fotografie</button>
+    <button class="tab-chir" onclick="switchTabChirA(5)">Consenso</button>
   </div></div>
 
   <!-- ALTRO TAB 0: ANAGRAFICA -->
@@ -759,7 +761,24 @@ input,textarea,button,select{font-family:var(--fnt);font-weight:700;}
     <div style="height:8px;"></div>
   </div>
 
-  <!-- ALTRO TAB 4: CONSENSO -->
+  <!-- ALTRO TAB 4: FOTOGRAFIE -->
+  <div class="page" id="altro-tab-foto">
+    <div class="foto-section">
+      <div class="foto-btn-row">
+        <button class="foto-btn foto-btn-camera" onclick="document.getElementById('input-camera-altro').click()">
+          Scatta foto
+          <input id="input-camera-altro" type="file" accept="image/*" capture="environment" multiple style="display:none;" onchange="aggiungiFoto(this,'altro')">
+        </button>
+        <button class="foto-btn foto-btn-gallery" onclick="document.getElementById('input-gallery-altro').click()">
+          Carica foto
+          <input id="input-gallery-altro" type="file" accept="image/*" multiple style="display:none;" onchange="aggiungiFoto(this,'altro')">
+        </button>
+      </div>
+      <div class="foto-gallery" id="foto-gallery-altro"></div>
+    </div>
+  </div>
+
+  <!-- ALTRO TAB 5: CONSENSO -->
   <div class="page" id="altro-tab4">
     <div class="group-label group-label-blue">Seleziona intervento</div>
     <div class="list list-blue">
@@ -1197,9 +1216,15 @@ function aggiornaNavTab(prefix, i, count){
   if(prevBtn) prevBtn.hidden = (i<=0);
   if(nextBtn) nextBtn.hidden = (i>=count-1);
 }
+function scrollTabInView(tabEl){
+  if(!tabEl) return;
+  tabEl.scrollIntoView({behavior:'smooth', inline:'center', block:'nearest'});
+}
 function switchTabEst(i){
   currentTabEst=i;
-  document.querySelectorAll('.tab-est').forEach(function(t,j){t.classList.toggle('active',i===j);});
+  var tabs=document.querySelectorAll('#app-est .tab-est');
+  tabs.forEach(function(t,j){t.classList.toggle('active',i===j);});
+  scrollTabInView(tabs[i]);
   var pages=['est-tab0','est-tab1','est-tab2','est-tab-foto','est-tab3'];
   pages.forEach(function(id,j){
     var el=document.getElementById(id);
@@ -1210,7 +1235,9 @@ function switchTabEst(i){
 }
 function switchTabChir(i){
   currentTabChir=i;
-  document.querySelectorAll('.tab-chir').forEach(function(t,j){t.classList.toggle('active',i===j);});
+  var tabs=document.querySelectorAll('#chir-mammella .tab-chir');
+  tabs.forEach(function(t,j){t.classList.toggle('active',i===j);});
+  scrollTabInView(tabs[i]);
   var pages=['chir-tab0','chir-tab1','chir-tab2','chir-tab3','chir-tab4','chir-tab-foto','chir-tab5'];
   pages.forEach(function(id,j){
     var el=document.getElementById(id);
@@ -1220,14 +1247,16 @@ function switchTabChir(i){
 }
 function switchTabChirA(i){
   currentTabChirA=i;
-  document.querySelectorAll('.tab-chir-a').forEach(function(t,j){t.classList.toggle('active',i===j);});
+  var tabs=document.querySelectorAll('#chir-altro .tab-chir');
+  tabs.forEach(function(t,j){t.classList.toggle('active',i===j);});
+  scrollTabInView(tabs[i]);
   var pagineChirA=document.querySelectorAll('#chir-altro .page');
   pagineChirA.forEach(function(p,j){p.style.display=(i===j)?'block':'none';});
   aggiornaNavTab('chira', i, pagineChirA.length);
 }
 function navTabEst(delta){ switchTabEst(Math.max(0, Math.min(4, currentTabEst+delta))); }
 function navTabChir(delta){ switchTabChir(Math.max(0, Math.min(6, currentTabChir+delta))); }
-function navTabChirA(delta){ switchTabChirA(Math.max(0, Math.min(4, currentTabChirA+delta))); }
+function navTabChirA(delta){ switchTabChirA(Math.max(0, Math.min(5, currentTabChirA+delta))); }
 ['est-tab0','est-tab1','est-tab2','est-tab-foto','est-tab3'].forEach(function(id,j){
   var el=document.getElementById(id);if(el)el.style.display=j===0?'block':'none';
 });
@@ -1881,6 +1910,7 @@ function salvaPDFAltro(){
       y=addSection(doc,y,'Dichiarazioni',SAGE);
       cons.punti.forEach(function(p){y=addYN(doc,y,p.testo,ynState['ac_'+p.id]);});
     }
+    try{y=addFotoToPDF(doc,y,'altro');}catch(e){}
     addFooter(doc);
     var cognome=(get('a-cognome')||'Paziente').replace(/\s+/g,'_');
     doc.save('Chir_'+cognome+'_'+new Date().toISOString().split('T')[0]+'.pdf');
