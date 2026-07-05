@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pulizia storico — Dr. Caccetta</title>
+<style>
+  body{font-family:-apple-system,"Helvetica Neue",Arial,sans-serif;background:#F2F2F7;margin:0;padding:24px 16px;color:#1C1C1E;}
+  .card{max-width:520px;margin:0 auto;background:#fff;border-radius:14px;padding:20px;box-shadow:0 1px 3px rgba(0,0,0,.08);}
+  h1{font-size:17px;margin:0 0 4px;}
+  p.sub{font-size:13px;color:#8E8E93;margin:0 0 18px;}
+  .stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:20px;}
+  .stat{background:#F2F2F7;border-radius:10px;padding:12px;text-align:center;}
+  .stat .n{font-size:22px;font-weight:700;}
+  .stat .l{font-size:11px;color:#8E8E93;text-transform:uppercase;font-weight:700;margin-top:2px;}
+  label{font-size:13px;color:#3C3C43;display:block;margin-bottom:6px;}
+  input[type=text]{width:100%;box-sizing:border-box;height:44px;border:1px solid #D1D1D6;border-radius:10px;padding:0 12px;font-size:16px;margin-bottom:12px;}
+  button{width:100%;height:48px;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;}
+  #btn-delete{background:#C0392B;color:#fff;}
+  #btn-delete:disabled{background:#E5B4AC;cursor:not-allowed;}
+  #log{margin-top:16px;font-size:13px;color:#3C3C43;line-height:1.6;}
+  #log p{margin:0 0 4px;}
+  .done{color:#30D158;font-weight:700;}
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>⚠️ Pulizia completa storico Supabase</h1>
+  <p class="sub">Operazione irreversibile. Cancella tutte le schede, foto e PDF caricati finora.</p>
+
+  <div class="stats">
+    <div class="stat"><div class="n" id="c-schede">–</div><div class="l">Schede</div></div>
+    <div class="stat"><div class="n" id="c-foto">–</div><div class="l">Righe foto</div></div>
+    <div class="stat"><div class="n" id="c-file">–</div><div class="l">File storage</div></div>
+  </div>
+
+  <div id="pre-delete">
+    <label for="confirm-input">Scrivi CANCELLA per abilitare l'eliminazione</label>
+    <input id="confirm-input" type="text" placeholder="CANCELLA" autocomplete="off">
+    <button id="btn-delete" disabled>Elimina tutto definitivamente</button>
+  </div>
+
+  <div id="log"></div>
+</div>
+
+<script>
+var SB_URL = 'https://bikfwlnzczbvgzsanfwc.supabase.co';
+var SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJpa2Z3bG56Y3pidmd6c2FuZndjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMxNzI5NzgsImV4cCI6MjA5ODc0ODk3OH0.gUiR3uEwbBHN1t_z-ec8d_uDBpiJgLRprf3x3rtd1ok';
+
+function sbHeaders(){
+  return { 'Content-Type':'application/json', 'apikey':SB_KEY, 'Authorization':'Bearer '+SB_KEY, 'Prefer':'return=representation' };
+}
+function log(msg, cls){
+  var el = document.getElementById('log');
+  var p = document.createElement('p');
+  if(cls) p.className = cls;
+  p.textContent = msg;
+  el.appendChild(p);
+}
+
+async function countRows(table){
+  try{
+    var res = await fetch(SB_URL+'/rest/v1/'+table+'?select=id', { headers: sbHeaders() });
+    var data = await res.json();
+    return Array.isArray(data) ? data.length : 0;
+  }catch(e){ return 0; }
+}
+
+async function listAllFiles(bucket, prefix){
+  var res = await fetch(SB_URL+'/storage/v1/object/list/'+bucket, {
+    method:'POST', headers: sbHeaders(),
+    body: JSON.stringify({ prefix: prefix, limit: 1000, sortBy: {column:'name', order:'asc'} })
+  });
+  var items = await res.json();
+  if(!Array.isArray(items)) return [];
+  var files = [];
+  for(var i=0;i<items.length;i++){
+    var item = items[i];
+    if(item.id === null){
+      var sub = await listAllFiles(bucket, prefix + item.name + '/');
+      files = files.concat(sub);
+    } else {
+      files.push(prefix + item.name);
+    }
+  }
+  return files;
+}
+
+var allFiles = [];
+
+async function caricaConteggi(){
+  var nSchede = await countRows('schede');
+  var nFoto = await countRows('foto');
+  allFiles = await listAllFiles('foto-pazienti', '');
+  document.getElementById('c-schede').textContent = nSchede;
+  document.getElementById('c-foto').textContent = nFoto;
+  document.getElementById('c-file').textContent = allFiles.length;
+}
+caricaConteggi();
+
+document.getElementById('confirm-input').addEventListener('input', function(e){
+  document.getElementById('btn-delete').disabled = (e.target.value.trim() !== 'CANCELLA');
+});
+
+document.getElementById('btn-delete').addEventListener('click', async function(){
+  var btn = this;
+  btn.disabled = true;
+  document.getElementById('confirm-input').disabled = true;
+  document.getElementById('log').innerHTML = '';
+
+  try{
+    log('Elimino i file dallo storage (' + allFiles.length + ')...');
+    for(var i=0;i<allFiles.length;i+=100){
+      var batch = allFiles.slice(i, i+100);
+      if(batch.length){
+        await fetch(SB_URL+'/storage/v1/object/foto-pazienti', {
+          method:'DELETE', headers: sbHeaders(), body: JSON.stringify({ prefixes: batch })
+        });
+      }
+    }
+    log('File storage eliminati.');
+
+    log('Elimino le righe della tabella foto...');
+    await fetch(SB_URL+'/rest/v1/foto?id=not.is.null', { method:'DELETE', headers: sbHeaders() });
+    log('Righe foto eliminate.');
+
+    log('Elimino le righe della tabella schede...');
+    await fetch(SB_URL+'/rest/v1/schede?id=not.is.null', { method:'DELETE', headers: sbHeaders() });
+    log('Righe schede eliminate.');
+
+    log('Fatto. Storico Supabase completamente pulito.', 'done');
+    document.getElementById('c-schede').textContent = '0';
+    document.getElementById('c-foto').textContent = '0';
+    document.getElementById('c-file').textContent = '0';
+    document.getElementById('pre-delete').querySelector('label').style.display='none';
+    document.getElementById('confirm-input').style.display='none';
+    btn.style.display='none';
+  }catch(e){
+    log('Errore durante la pulizia: ' + e.message);
+    btn.disabled = false;
+    document.getElementById('confirm-input').disabled = false;
+  }
+});
+</script>
+</body>
+</html>
