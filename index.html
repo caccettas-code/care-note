@@ -29,20 +29,11 @@ input,textarea,button,select{font-family:var(--fnt);font-weight:700;}
 
 /* ── HOME ── */
 .home{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:32px 22px;background:#BEC6C3;}
-.home-logo{font-size:22px;font-weight:700;color:#1C1C1E;margin-bottom:4px;letter-spacing:-.3px;}
-.logo-box{border:3px solid #1C1C1E;padding:28px 46px;text-align:center;font-family:"Poppins",sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:2px;line-height:1.6;font-size:38px;color:#1C1C1E;margin-bottom:24px;background:transparent;}
 .brand-mark{position:fixed;top:calc(14px + env(safe-area-inset-top));left:18px;font-family:"Poppins",sans-serif;font-weight:700;font-size:13px;letter-spacing:0.5px;color:#1C1C1E;opacity:.6;z-index:40;}
-.home-sub{font-size:13.5px;color:rgba(28,28,30,.55);font-weight:500;margin-bottom:36px;text-align:center;letter-spacing:.1px;}
+.home-sub{font-size:15px;color:rgba(28,28,30,.6);font-weight:600;margin-bottom:40px;text-align:center;letter-spacing:.1px;}
 .home-cards{display:flex;flex-direction:column;gap:12px;width:100%;max-width:400px;}
-.home-card{border-radius:20px;padding:14px 16px;cursor:pointer;display:flex;align-items:center;gap:14px;background:rgba(255,255,255,.55);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border:0.5px solid rgba(255,255,255,.5);box-shadow:0 1px 2px rgba(0,0,0,.04),0 8px 22px rgba(28,28,30,.07);transition:transform .12s ease;}
+.home-card{border-radius:20px;padding:16px 18px;cursor:pointer;display:flex;align-items:center;gap:14px;background:rgba(255,255,255,.55);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border:0.5px solid rgba(255,255,255,.5);box-shadow:0 1px 2px rgba(0,0,0,.04),0 8px 22px rgba(28,28,30,.07);transition:transform .12s ease;}
 .home-card:active{transform:scale(.97);}
-.home-card-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:inset 0 1px 1px rgba(255,255,255,.3);}
-.home-card-icon svg{width:22px;height:22px;stroke:#fff;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
-.home-card-est .home-card-icon{background:linear-gradient(160deg,#9CADA8,#7E9490);}
-.home-card-chir .home-card-icon{background:linear-gradient(160deg,#7B9591,#5E7773);}
-.home-card-docs .home-card-icon{background:linear-gradient(160deg,#B0A99C,#958E80);}
-.home-card-storico .home-card-icon{background:linear-gradient(160deg,#93A0A8,#70828C);}
-.home-card-app .home-card-icon{background:linear-gradient(160deg,#D2AE87,#B78E68);}
 .home-card-text{flex:1;min-width:0;}
 .home-card-title{font-size:16px;font-weight:700;color:#1C1C1E;margin-bottom:2px;letter-spacing:-.1px;}
 .home-card-desc{font-size:12.5px;color:rgba(28,28,30,.5);font-weight:500;line-height:1.35;}
@@ -188,14 +179,9 @@ input,textarea,button,select{font-family:var(--fnt);font-weight:700;}
 <!-- ══ HOME ══ -->
 <div class="home" id="home-screen" style="display:flex!important;">
   <div class="brand-mark">CareNote</div>
-  <div class="logo-box">
-    <div>Studio</div>
-    <div>Caccetta</div>
-  </div>
   <div class="home-sub">Chirurgia Plastica, Ricostruttiva ed Estetica</div>
   <div class="home-cards">
     <div class="home-card home-card-est" onclick="openSection('est')">
-      <div class="home-card-icon"><svg viewBox="0 0 24 24"><g transform="rotate(45 12 12)"><rect x="8.5" y="5" width="7" height="9" rx="1.2"/><line x1="12" y1="5" x2="12" y2="1.5"/><line x1="12" y1="14" x2="12" y2="19"/><rect x="8.5" y="19" width="7" height="2" rx="1"/><line x1="8.5" y1="7.5" x2="15.5" y2="7.5"/><line x1="8.5" y1="9.5" x2="15.5" y2="9.5"/><line x1="8.5" y1="11.5" x2="15.5" y2="11.5"/></g></svg></div>
       <div class="home-card-text">
         <div class="home-card-title">Medicina Estetica</div>
         <div class="home-card-desc">Filler, tossina botulinica, biostimolazione, peeling</div>
@@ -203,7 +189,6 @@ input,textarea,button,select{font-family:var(--fnt);font-weight:700;}
       <div class="home-card-chevron">›</div>
     </div>
     <div class="home-card home-card-chir" onclick="openSection('chir')">
-      <div class="home-card-icon"><svg viewBox="0 0 24 24"><path d="M2 2C3 6 5 8 8 10c1.2.6 2 -.2 1.4 -1.4C7.4 5.6 5.2 3.4 2 2Z"/><ellipse cx="5.3" cy="5.3" rx=".5" ry="2.6" transform="rotate(45 5.3 5.3)"/><line x1="9.4" y1="8.6" x2="11" y2="10.2"/><line x1="8" y1="10" x2="9.6" y2="11.6"/><path d="M9.5 10.3L20 20.8c1 1 2.4 -.4 1.4 -1.4L11 9"/><ellipse cx="15.2" cy="15.5" rx=".55" ry="3" transform="rotate(45 15.2 15.5)"/><g transform="rotate(45 17.5 17.8)"><line x1="16.3" y1="16.6" x2="16.3" y2="19"/><line x1="17" y1="16.6" x2="17" y2="19"/><line x1="17.7" y1="16.6" x2="17.7" y2="19"/><line x1="18.4" y1="16.6" x2="18.4" y2="19"/></g></svg></div>
       <div class="home-card-text">
         <div class="home-card-title">Chirurgia</div>
         <div class="home-card-desc">Programmazione interventi chirurgici</div>
@@ -211,7 +196,6 @@ input,textarea,button,select{font-family:var(--fnt);font-weight:700;}
       <div class="home-card-chevron">›</div>
     </div>
     <div class="home-card home-card-docs" onclick="openSection('docs')">
-      <div class="home-card-icon"><svg viewBox="0 0 24 24"><path d="M7 3h7l4 4v14a1 1 0 01-1 1H7a1 1 0 01-1-1V4a1 1 0 011-1z"/><path d="M14 3v4h4M9 12h6M9 16h6"/></svg></div>
       <div class="home-card-text">
         <div class="home-card-title">Documenti</div>
         <div class="home-card-desc">Consensi informativi e schede per il paziente</div>
@@ -219,7 +203,6 @@ input,textarea,button,select{font-family:var(--fnt);font-weight:700;}
       <div class="home-card-chevron">›</div>
     </div>
     <div class="home-card home-card-storico" onclick="openSection('storico')">
-      <div class="home-card-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg></div>
       <div class="home-card-text">
         <div class="home-card-title">Storico Pazienti</div>
         <div class="home-card-desc">Cerca e consulta le schede archiviate</div>
@@ -227,7 +210,6 @@ input,textarea,button,select{font-family:var(--fnt);font-weight:700;}
       <div class="home-card-chevron">›</div>
     </div>
     <div class="home-card home-card-app" onclick="openSection('appuntamenti')">
-      <div class="home-card-icon"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/><circle cx="8.5" cy="14.5" r="1" fill="#fff" stroke="none"/><circle cx="12" cy="14.5" r="1" fill="#fff" stroke="none"/><circle cx="15.5" cy="14.5" r="1" fill="#fff" stroke="none"/></svg></div>
       <div class="home-card-text">
         <div class="home-card-title">Appuntamenti</div>
         <div class="home-card-desc">Calendario visite e trattamenti</div>
