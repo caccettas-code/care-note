@@ -1041,7 +1041,7 @@ input,textarea,button,select{font-family:var(--fnt);font-weight:700;}
 <!-- ══ MODAL NUOVO APPUNTAMENTO ══ -->
 <div id="app-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:250;align-items:center;justify-content:center;padding:20px;">
   <div style="background:#fff;border-radius:16px;padding:24px;width:100%;max-width:420px;">
-    <div style="font-weight:700;font-size:17px;margin-bottom:16px;">Nuovo appuntamento</div>
+    <div id="app-form-titolo" style="font-weight:700;font-size:17px;margin-bottom:16px;">Nuovo appuntamento</div>
     <label style="font-size:12px;color:#8E8E93;font-weight:700;">Data</label>
     <input type="date" id="app-form-data" style="width:100%;height:44px;border-radius:10px;border:1px solid #D1D1D6;padding:0 12px;margin:6px 0 14px;font-size:15px;box-sizing:border-box;">
     <label style="font-size:12px;color:#8E8E93;font-weight:700;">Orario</label>
@@ -2787,13 +2787,17 @@ function renderListaGiorno(){
   el.innerHTML = delGiorno.map(function(a){
     var ora = (a.ora||'').substring(0,5);
     return '<div class="row appt-row">'
-      + '<span class="appt-text"><b>'+ora+'</b> — '+ (a.paziente||'') + (a.trattamento? ' <span style="color:#8E8E93;">· '+a.trattamento+'</span>' : '') + '</span>'
-      + '<button class="appt-del-btn" onclick="eliminaAppuntamento(\''+a.id+'\')" style="border:none;background:none;color:#C0392B;font-weight:700;font-size:13px;padding:0 16px;cursor:pointer;">Elimina</button>'
+      + '<span class="appt-text" style="cursor:pointer;" onclick="modificaAppuntamento(\''+a.id+'\')"><b>'+ora+'</b> — '+ (a.paziente||'') + (a.trattamento? ' <span style="color:#8E8E93;">· '+a.trattamento+'</span>' : '') + '</span>'
+      + '<button class="appt-del-btn" onclick="event.stopPropagation();eliminaAppuntamento(\''+a.id+'\')" style="border:none;background:none;color:#C0392B;font-weight:700;font-size:13px;padding:0 16px;cursor:pointer;">Elimina</button>'
       + '</div>';
   }).join('');
 }
 
+var appuntamentoInModifica = null;
+
 function apriFormAppuntamento(){
+  appuntamentoInModifica = null;
+  document.getElementById('app-form-titolo').textContent = 'Nuovo appuntamento';
   document.getElementById('app-form-data').value = calGiornoSel;
   document.getElementById('app-form-ora').value = '';
   document.getElementById('app-form-paziente').value = '';
@@ -2801,7 +2805,20 @@ function apriFormAppuntamento(){
   document.getElementById('app-modal').style.display = 'flex';
 }
 
+function modificaAppuntamento(id){
+  var a = appuntamentiCache.find(function(x){ return x.id===id; });
+  if(!a) return;
+  appuntamentoInModifica = id;
+  document.getElementById('app-form-titolo').textContent = 'Modifica appuntamento';
+  document.getElementById('app-form-data').value = a.data;
+  document.getElementById('app-form-ora').value = (a.ora||'').substring(0,5);
+  document.getElementById('app-form-paziente').value = a.paziente || '';
+  document.getElementById('app-form-trattamento').value = a.trattamento || '';
+  document.getElementById('app-modal').style.display = 'flex';
+}
+
 function chiudiFormAppuntamento(){
+  appuntamentoInModifica = null;
   document.getElementById('app-modal').style.display = 'none';
 }
 
@@ -2818,11 +2835,20 @@ async function salvaAppuntamento(){
 
   showToast('Salvataggio...');
   try{
-    var res = await fetch(SB_URL + '/rest/v1/appuntamenti', {
-      method: 'POST',
-      headers: sbHeaders(),
-      body: JSON.stringify({ data: data, ora: ora, paziente: paziente, trattamento: trattamento })
-    });
+    var res;
+    if(appuntamentoInModifica){
+      res = await fetch(SB_URL + '/rest/v1/appuntamenti?id=eq.' + appuntamentoInModifica, {
+        method: 'PATCH',
+        headers: sbHeaders(),
+        body: JSON.stringify({ data: data, ora: ora, paziente: paziente, trattamento: trattamento })
+      });
+    } else {
+      res = await fetch(SB_URL + '/rest/v1/appuntamenti', {
+        method: 'POST',
+        headers: sbHeaders(),
+        body: JSON.stringify({ data: data, ora: ora, paziente: paziente, trattamento: trattamento })
+      });
+    }
     if(!res.ok){
       var errText = await res.text();
       showToast('Errore salvataggio: ' + errText.substring(0,150));
