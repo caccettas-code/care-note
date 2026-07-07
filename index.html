@@ -75,6 +75,9 @@ input,textarea,button,select{font-family:var(--fnt);font-weight:700;}
 .row{display:flex;align-items:center;border-bottom:0.5px solid var(--sep);min-height:48px;}
 .row:last-child{border-bottom:none;}
 .row-lbl{font-size:15px;color:var(--txt);padding:14px 12px 14px 16px;min-width:130px;flex-shrink:0;}
+.appt-row{align-items:flex-start;}
+.appt-text{flex:1;min-width:0;font-size:15px;color:var(--txt);padding:14px 12px 14px 16px;line-height:1.45;word-break:break-word;}
+.appt-del-btn{flex-shrink:0;margin-top:10px;margin-right:4px;}
 .row input,.row select{flex:1;border:none;outline:none;font-family:var(--fnt);font-weight:700;font-size:15px;color:var(--txt);background:transparent;padding:14px 16px 14px 0;text-align:right;-webkit-appearance:none;}
 .row input::placeholder{color:var(--txt3);}
 .row-area-lbl{font-size:11px;color:var(--txt3);text-transform:uppercase;letter-spacing:.4px;padding:12px 16px 0;}
@@ -2783,9 +2786,9 @@ function renderListaGiorno(){
   }
   el.innerHTML = delGiorno.map(function(a){
     var ora = (a.ora||'').substring(0,5);
-    return '<div class="row">'
-      + '<span class="row-lbl"><b>'+ora+'</b> — '+ (a.paziente||'') + (a.trattamento? ' <span style="color:#8E8E93;">· '+a.trattamento+'</span>' : '') + '</span>'
-      + '<button onclick="eliminaAppuntamento(\''+a.id+'\')" style="border:none;background:none;color:#C0392B;font-weight:700;font-size:13px;padding:0 16px;cursor:pointer;">Elimina</button>'
+    return '<div class="row appt-row">'
+      + '<span class="appt-text"><b>'+ora+'</b> — '+ (a.paziente||'') + (a.trattamento? ' <span style="color:#8E8E93;">· '+a.trattamento+'</span>' : '') + '</span>'
+      + '<button class="appt-del-btn" onclick="eliminaAppuntamento(\''+a.id+'\')" style="border:none;background:none;color:#C0392B;font-weight:700;font-size:13px;padding:0 16px;cursor:pointer;">Elimina</button>'
       + '</div>';
   }).join('');
 }
