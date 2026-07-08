@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Importa consensi</title>
+<style>
+  body{font-family:-apple-system,"Helvetica Neue",Arial,sans-serif;background:#F2F2F7;margin:0;padding:24px 16px;color:#1C1C1E;}
+  .card{max-width:560px;margin:0 auto;background:#fff;border-radius:14px;padding:20px;box-shadow:0 1px 3px rgba(0,0,0,.08);}
+  h1{font-size:17px;margin:0 0 4px;}
+  p.sub{font-size:13px;color:#8E8E93;margin:0 0 18px;}
+  button{width:100%;height:48px;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;background:#8E6B4C;color:#fff;margin-bottom:14px;}
+  button:disabled{background:#D8C7B6;}
+  .row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:0.5px solid #E5E5EA;font-size:13px;}
+  .ok{color:#30D158;font-weight:700;}
+  .err{color:#C0392B;font-weight:700;}
+  .wait{color:#8E8E93;}
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>Importa consensi nella cartella "consensi"</h1>
+  <p class="sub">Carica automaticamente tutti i PDF di consenso su Supabase Storage, dentro Documenti → Cartelle e documenti → consensi.</p>
+  <button id="btn-start">Importa tutti (19 file)</button>
+  <div id="list"></div>
+</div>
+
+<script>
+var SB_URL = 'https://bikfwlnzczbvgzsanfwc.supabase.co';
+var SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJpa2Z3bG56Y3pidmd6c2FuZndjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMxNzI5NzgsImV4cCI6MjA5ODc0ODk3OH0.gUiR3uEwbBHN1t_z-ec8d_uDBpiJgLRprf3x3rtd1ok';
+var DOC_BUCKET = 'documenti-studio';
+var FOLDER = 'consensi';
+
+var FILES = [
+  'consenso_ADDOMINOPLASTICA.pdf',
+  'consenso_BLEFAROPLASTICA.pdf',
+  'consenso_CHIRURGIA-CUTANEA-SOTTOCUTANEA.pdf',
+  'consenso_GINECOMASTIA.pdf',
+  'consenso_GLUTEOPLASTICA.pdf',
+  'consenso_LIFTING-DELLE-BRACCIA.pdf',
+  'consenso_LIFTING-DELLE-COSCE.pdf',
+  'consenso_LIFTING-FRONTALE-E-TEMPORALE.pdf',
+  'consenso_LIFTING_DEL_VISO.pdf',
+  'consenso_LIPOFILLING-MAMMELLA.pdf',
+  'consenso_LIPOFILLING.pdf',
+  'consenso_LIPOSUZIONE.pdf',
+  'consenso_MASTOPESSI-E-MASTOPLASTICA-ADDITIVA.pdf',
+  'consenso_MASTOPESSI.pdf',
+  'consenso_MASTOPLASTICA-ADDITIVA.pdf',
+  'consenso_MASTOPLASTICA-RIDUTTIVA.pdf',
+  'consenso_MENTOPLASTICA.pdf',
+  'consenso_OTOPLASTICA.pdf',
+  'consenso_RINOPLASTICA.pdf'
+];
+
+var listEl = document.getElementById('list');
+var rows = {};
+FILES.forEach(function(name){
+  var r = document.createElement('div');
+  r.className = 'row';
+  r.innerHTML = '<span>'+name+'</span><span class="wait" id="st-'+name+'">in attesa</span>';
+  listEl.appendChild(r);
+  rows[name] = document.getElementById('st-'+name);
+});
+
+async function creaCartellaSeNonEsiste(){
+  try{
+    var blob = new Blob([''], {type:'text/plain'});
+    await fetch(SB_URL+'/storage/v1/object/'+DOC_BUCKET+'/'+FOLDER+'/.keep', {
+      method:'POST',
+      headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'text/plain','x-upsert':'true'},
+      body: blob
+    });
+  }catch(e){}
+}
+
+async function caricaFile(name){
+  var res = await fetch(name);
+  if(!res.ok) throw new Error('file non trovato ('+res.status+')');
+  var blob = await res.blob();
+  var path = FOLDER + '/' + name;
+  var up = await fetch(SB_URL+'/storage/v1/object/'+DOC_BUCKET+'/'+path, {
+    method:'POST',
+    headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/pdf','x-upsert':'true'},
+    body: blob
+  });
+  if(!up.ok){
+    var t = await up.text();
+    throw new Error('upload fallito: '+up.status+' '+t.substring(0,120));
+  }
+}
+
+document.getElementById('btn-start').addEventListener('click', async function(){
+  this.disabled = true;
+  this.textContent = 'Importazione in corso...';
+  await creaCartellaSeNonEsiste();
+  var okCount = 0, errCount = 0;
+  for(var i=0;i<FILES.length;i++){
+    var name = FILES[i];
+    rows[name].textContent = 'caricamento...';
+    rows[name].className = 'wait';
+    try{
+      await caricaFile(name);
+      rows[name].textContent = 'fatto';
+      rows[name].className = 'ok';
+      okCount++;
+    }catch(e){
+      rows[name].textContent = 'errore: ' + e.message;
+      rows[name].className = 'err';
+      errCount++;
+    }
+  }
+  this.textContent = 'Completato: ' + okCount + ' ok, ' + errCount + ' errori';
+});
+</script>
+</body>
+</html>
