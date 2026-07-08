@@ -3115,14 +3115,11 @@ async function salvaEst() {
   dati.ts = new Date().toISOString();
   dati.tipo = 'est';
   
-  // Genera e scarica il PDF SUBITO, prima di qualunque chiamata di rete:
-  // cosi il download locale avviene sempre, anche se Supabase da problemi.
+  // Genera il PDF (ma non lo mostra/condivide ancora: prima va completato il salvataggio cloud,
+  // perche il pannello di condivisione nativo puo mettere in pausa le richieste di rete in corso)
   var docEst = null;
   var fileNamePdfEst = 'Estetica_'+(cognome||'Paziente').replace(/\s+/g,'_')+'_'+new Date().toISOString().split('T')[0]+'.pdf';
-  try{
-    docEst = costruisciPDFEst();
-    if(docEst) scaricaPDF(docEst, fileNamePdfEst);
-  }catch(e){ console.error('Errore generazione/download PDF:', e); }
+  try{ docEst = costruisciPDFEst(); }catch(e){ console.error('Errore generazione PDF:', e); }
   
   var cloudOk = false;
   var pdfArchiviato = false;
@@ -3159,6 +3156,9 @@ async function salvaEst() {
   localStorage.setItem(schedaIdEst, JSON.stringify(dati));
   localStorage.setItem('sc_last_est', schedaIdEst);
   
+  // Solo ORA, a salvataggio cloud concluso, mostra il pannello di condivisione/download del PDF
+  if(docEst){ try{ scaricaPDF(docEst, fileNamePdfEst); }catch(e){ console.error('Errore condivisione/download PDF:', e); } }
+  
   if(!cloudOk){
     showToast('Scheda salvata solo in locale. Errore Supabase: ' + (lastSbErrorMsg || 'sconosciuto') + '. Il PDF nello storico non sarà disponibile finché non risalvi con connessione attiva.');
   } else if(!pdfArchiviato){
@@ -3185,14 +3185,11 @@ async function salvaChir() {
   dati.ts = new Date().toISOString();
   dati.tipo = 'chir';
   
-  // Genera e scarica il PDF SUBITO, prima di qualunque chiamata di rete:
-  // cosi il download locale avviene sempre, anche se Supabase da problemi.
+  // Genera il PDF (ma non lo mostra/condivide ancora: prima va completato il salvataggio cloud,
+  // perche il pannello di condivisione nativo puo mettere in pausa le richieste di rete in corso)
   var docChir = null;
   var fileNamePdfChir = 'Mammella_'+(cognome||'Paziente').replace(/\s+/g,'_')+'_'+new Date().toISOString().split('T')[0]+'.pdf';
-  try{
-    docChir = costruisciPDFChir();
-    if(docChir) scaricaPDF(docChir, fileNamePdfChir);
-  }catch(e){ console.error('Errore generazione/download PDF:', e); }
+  try{ docChir = costruisciPDFChir(); }catch(e){ console.error('Errore generazione PDF:', e); }
   
   var cloudOk = false;
   var pdfArchiviato = false;
@@ -3228,6 +3225,9 @@ async function salvaChir() {
   // Save to localStorage (sempre, indipendentemente da eventuali errori cloud sopra)
   localStorage.setItem(schedaIdChir, JSON.stringify(dati));
   localStorage.setItem('sc_last_chir', schedaIdChir);
+  
+  // Solo ORA, a salvataggio cloud concluso, mostra il pannello di condivisione/download del PDF
+  if(docChir){ try{ scaricaPDF(docChir, fileNamePdfChir); }catch(e){ console.error('Errore condivisione/download PDF:', e); } }
   
   if(!cloudOk){
     showToast('Scheda salvata solo in locale. Errore Supabase: ' + (lastSbErrorMsg || 'sconosciuto') + '. Il PDF nello storico non sarà disponibile finché non risalvi con connessione attiva.');
