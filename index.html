@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Schede Cliniche">
-<meta name="theme-color" content="#BEC6C3">
+<meta name="theme-color" content="#020028">
 <link rel="manifest" href="/care-note/manifest.json">
 <link rel="apple-touch-icon" href="icon-192.png">
 <title>Studio Caccetta</title>
@@ -23,14 +23,14 @@
   --txt:#1C1C1E;--txt3:#8E8E93;
   --fnt:"Poppins","Helvetica Neue",Helvetica,Arial,sans-serif;
 }
-html{background:#BEC6C3;}
-body{font-family:var(--fnt);font-weight:700;background:#BEC6C3;min-height:100vh;color:var(--txt);font-size:16px;padding-bottom:88px;}
+html{background:#020028;}
+body{font-family:var(--fnt);font-weight:700;background:#020028;min-height:100vh;color:var(--txt);font-size:16px;padding-bottom:88px;}
 input,textarea,button,select{font-family:var(--fnt);font-weight:700;}
 
 /* ── HOME ── */
-.home{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:32px 22px;background:#BEC6C3;}
-.brand-mark{position:fixed;top:calc(14px + env(safe-area-inset-top));left:18px;font-family:"Poppins",sans-serif;font-weight:700;font-size:13px;letter-spacing:0.5px;color:#1C1C1E;opacity:.6;z-index:40;}
-.home-sub{font-size:15px;color:rgba(28,28,30,.6);font-weight:600;margin-bottom:40px;text-align:center;letter-spacing:.1px;}
+.home{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:32px 22px;background:#020028;}
+.brand-mark{position:fixed;top:calc(14px + env(safe-area-inset-top));left:18px;font-family:"Poppins",sans-serif;font-weight:700;font-size:13px;letter-spacing:0.5px;color:#fff;opacity:.7;z-index:40;}
+.home-sub{font-size:15px;color:rgba(255,255,255,.65);font-weight:600;margin-bottom:40px;text-align:center;letter-spacing:.1px;}
 .home-cards{display:flex;flex-direction:column;gap:12px;width:100%;max-width:400px;}
 .home-card{border-radius:20px;padding:16px 18px;cursor:pointer;display:flex;align-items:center;gap:14px;background:rgba(255,255,255,.55);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border:0.5px solid rgba(255,255,255,.5);box-shadow:0 1px 2px rgba(0,0,0,.04),0 8px 22px rgba(28,28,30,.07);transition:transform .12s ease;}
 .home-card:active{transform:scale(.97);}
@@ -2890,33 +2890,40 @@ function sbHeaders() {
 var lastSbErrorMsg = '';
 
 async function sbSalvaScheda(tipo, cognome, nome, dati) {
-  try {
-    var res = await fetch(SB_URL + '/rest/v1/schede', {
-      method: 'POST',
-      headers: sbHeaders(),
-      body: JSON.stringify({
-        tipo: tipo,
-        cognome: cognome || '',
-        nome: nome || '',
-        data_nascita: dati['e-dob'] || dati['c-dob'] || '',
-        dati: dati
-      })
-    });
-    if(!res.ok){
-      var errText = '';
-      try{ errText = await res.text(); }catch(e2){}
-      lastSbErrorMsg = 'HTTP ' + res.status + (errText ? ': ' + errText.substring(0,200) : '');
+  var body = JSON.stringify({
+    tipo: tipo,
+    cognome: cognome || '',
+    nome: nome || '',
+    data_nascita: dati['e-dob'] || dati['c-dob'] || '',
+    dati: dati
+  });
+  // Un solo ritentativo, e solo quando sappiamo che l'INSERT precedente non è
+  // andato a buon fine (risposta non-ok, o eccezione di rete prima di ricevere
+  // risposta). Se invece res.ok era true la riga è già stata creata sul server:
+  // ripetere il POST in quel caso duplicherebbe la scheda del paziente.
+  for(var tentativo=0; tentativo<2; tentativo++){
+    try {
+      var res = await fetch(SB_URL + '/rest/v1/schede', {
+        method: 'POST',
+        headers: sbHeaders(),
+        body: body
+      });
+      if(!res.ok){
+        var errText = '';
+        try{ errText = await res.text(); }catch(e2){}
+        lastSbErrorMsg = 'HTTP ' + res.status + (errText ? ': ' + errText.substring(0,200) : '');
+        continue;
+      }
+      var rows = await res.json();
+      if(Array.isArray(rows) && rows[0]) return rows[0].id;
+      lastSbErrorMsg = 'Scheda creata ma risposta del server inattesa (ID non ricevuto)';
       return null;
+    } catch(e) {
+      lastSbErrorMsg = (e && e.message) ? e.message : String(e);
+      console.error('Supabase save error:', e);
     }
-    var rows = await res.json();
-    if(Array.isArray(rows) && rows[0]) return rows[0].id;
-    lastSbErrorMsg = 'Risposta inattesa dal server';
-    return null;
-  } catch(e) {
-    lastSbErrorMsg = (e && e.message) ? e.message : String(e);
-    console.error('Supabase save error:', e);
-    return null;
   }
+  return null;
 }
 
 async function sbAggiornalScheda(id, tipo, cognome, nome, dati) {
@@ -3024,12 +3031,24 @@ async function sbGetFoto(schedaId) {
 }
 
 async function sbGetSchede() {
+  // Pagina i risultati invece di un limit fisso: oltre quella soglia le schede
+  // più vecchie sparivano silenziosamente da storico e ricerca.
+  var tutte = [];
+  var pageSize = 500;
+  var offset = 0;
   try {
-    var res = await fetch(SB_URL + '/rest/v1/schede?order=updated_at.desc&limit=500', {
-      headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY }
-    });
-    return await res.json();
-  } catch(e) { return []; }
+    while(true){
+      var res = await fetch(SB_URL + '/rest/v1/schede?order=updated_at.desc&limit=' + pageSize + '&offset=' + offset, {
+        headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY }
+      });
+      var pagina = await res.json();
+      if(!Array.isArray(pagina) || !pagina.length) break;
+      tutte = tutte.concat(pagina);
+      if(pagina.length < pageSize) break;
+      offset += pageSize;
+    }
+  } catch(e) {}
+  return tutte;
 }
 
 async function sbListaFileScheda(schedaId){
@@ -3129,7 +3148,6 @@ async function salvaEst() {
       cloudOk = await sbAggiornalScheda(sbIdEst, 'est', cognome, nome, dati);
     } else {
       sbIdEst = await sbSalvaScheda('est', cognome, nome, dati);
-      if(!sbIdEst){ try{ sbIdEst = await sbSalvaScheda('est', cognome, nome, dati); }catch(e){} }
       cloudOk = !!sbIdEst;
     }
     
@@ -3152,10 +3170,16 @@ async function salvaEst() {
     console.error('Errore salvataggio cloud:', e);
   }
   
-  // Save to localStorage (sempre, indipendentemente da eventuali errori cloud sopra)
-  localStorage.setItem(schedaIdEst, JSON.stringify(dati));
+  // Locale solo come fallback offline: se il cloud ha salvato con successo non serve
+  // tenere una copia locale, altrimenti localStorage cresce senza limiti nel tempo
+  // e rallenta ogni apertura dello storico (che deve scansionarlo per intero).
+  if(cloudOk){
+    try{localStorage.removeItem(schedaIdEst);}catch(e){}
+  } else {
+    localStorage.setItem(schedaIdEst, JSON.stringify(dati));
+  }
   localStorage.setItem('sc_last_est', schedaIdEst);
-  
+
   // Solo ORA, a salvataggio cloud concluso, mostra il pannello di condivisione/download del PDF
   if(docEst){ try{ scaricaPDF(docEst, fileNamePdfEst); }catch(e){ console.error('Errore condivisione/download PDF:', e); } }
   
@@ -3199,7 +3223,6 @@ async function salvaChir() {
       cloudOk = await sbAggiornalScheda(sbIdChir, 'chir', cognome, nome, dati);
     } else {
       sbIdChir = await sbSalvaScheda('chir', cognome, nome, dati);
-      if(!sbIdChir){ try{ sbIdChir = await sbSalvaScheda('chir', cognome, nome, dati); }catch(e){} }
       cloudOk = !!sbIdChir;
     }
     
@@ -3222,10 +3245,16 @@ async function salvaChir() {
     console.error('Errore salvataggio cloud:', e);
   }
   
-  // Save to localStorage (sempre, indipendentemente da eventuali errori cloud sopra)
-  localStorage.setItem(schedaIdChir, JSON.stringify(dati));
+  // Locale solo come fallback offline: se il cloud ha salvato con successo non serve
+  // tenere una copia locale, altrimenti localStorage cresce senza limiti nel tempo
+  // e rallenta ogni apertura dello storico (che deve scansionarlo per intero).
+  if(cloudOk){
+    try{localStorage.removeItem(schedaIdChir);}catch(e){}
+  } else {
+    localStorage.setItem(schedaIdChir, JSON.stringify(dati));
+  }
   localStorage.setItem('sc_last_chir', schedaIdChir);
-  
+
   // Solo ORA, a salvataggio cloud concluso, mostra il pannello di condivisione/download del PDF
   if(docChir){ try{ scaricaPDF(docChir, fileNamePdfChir); }catch(e){ console.error('Errore condivisione/download PDF:', e); } }
   
@@ -3254,11 +3283,10 @@ async function aggiornaStorico() {
   
   // Load from Supabase
   var schede = await sbGetSchede();
-  
+
   // Merge with localStorage (offline fallback)
   var lsSchede = getAllSchede();
-  var sbIds = new Set(schede.map(function(s){ return s.id; }));
-  
+
   // Convert Supabase format to display format
   var tutte = schede.map(function(s) {
     var d = s.dati || {};
@@ -3281,10 +3309,18 @@ async function aggiornaStorico() {
     };
   });
   
-  // Add localStorage entries not in Supabase
+  // Add localStorage entries not already present in Supabase.
+  // Confronto O(1) tramite indice (invece di un .find() per ogni voce, che con
+  // molte schede diventava via via più lento) e nome normalizzato (spazi/maiuscole)
+  // per non mostrare due volte lo stesso paziente.
+  var chiaveScheda=function(tipo,nome){ return tipo+'|'+(nome||'').trim().toLowerCase(); };
+  var indiceSchede={};
+  tutte.forEach(function(t){ indiceSchede[chiaveScheda(t.tipo,t.nomeCompleto)]=true; });
   lsSchede.forEach(function(s) {
-    if(!tutte.find(function(t){ return t.nomeCompleto===s.nomeCompleto && t.tipo===s.tipo; })) {
+    var k=chiaveScheda(s.tipo,s.nomeCompleto);
+    if(!indiceSchede[k]) {
       tutte.push(s);
+      indiceSchede[k]=true;
     }
   });
   
