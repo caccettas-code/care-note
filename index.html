@@ -27,6 +27,12 @@ html{background:#020028;}
 body{font-family:var(--fnt);font-weight:700;background:#020028;min-height:100vh;color:var(--txt);font-size:16px;padding-bottom:88px;}
 input,textarea,button,select{font-family:var(--fnt);font-weight:700;}
 
+/* ── PAGINE INTERNE ──
+   Testi e card semi-trasparenti di queste pagine sono pensati per uno sfondo
+   chiaro: senza questa regola erediterebbero il blu scuro di body e
+   diventerebbero illeggibili (contrasto insufficiente). */
+#app-est,#app-chir,#app-docs,#app-storico,#app-cartelle,#app-appuntamenti{background:#BEC6C3;min-height:100vh;}
+
 /* ── HOME ── */
 .home{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:32px 22px;background:#020028;}
 .brand-mark{position:fixed;top:calc(14px + env(safe-area-inset-top));left:18px;font-family:"Poppins",sans-serif;font-weight:700;font-size:13px;letter-spacing:0.5px;color:#fff;opacity:.7;z-index:40;}
